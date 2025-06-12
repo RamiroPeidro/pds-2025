@@ -1,14 +1,22 @@
 spring:
   application:
     name: sports-manager
-  profiles:
-    active: dev
+  # Database configuration - Supabase PostgreSQL
+  datasource:
+    url: jdbc:postgresql://db.avtmdjyliuqqoouqzhpo.supabase.co:5432/postgres
+    username: postgres
+    password: ${SUPABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
   
-  # Common JPA configuration
+  # JPA configuration
   jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
     open-in-view: false
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
         jdbc:
           time_zone: UTC
@@ -50,6 +58,11 @@ springdoc:
     enabled: true
 
 # Application specific properties
+# Supabase configuration
+supabase:
+  url: https://avtmdjyliuqqoouqzhpo.supabase.co
+  anon-key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2dG1kanlsaXVxcW9vdXF6aHBvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3MDUwMzYsImV4cCI6MjA2NTI4MTAzNn0.LKY_VXH04mmf24nnsJQUFJw3w95udswO953ZkgbSJQM
+
 app:
   firebase:
     service-account-key: ${FIREBASE_SERVICE_ACCOUNT_KEY:}
