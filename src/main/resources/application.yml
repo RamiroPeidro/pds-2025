@@ -4,28 +4,14 @@ spring:
   profiles:
     active: dev
   
-  # Database configuration
-  datasource:
-    url: jdbc:h2:mem:sportsmanager
-    driver-class-name: org.h2.Driver
-    username: sa
-    password: 
-  
-  # JPA/Hibernate configuration
+  # Common JPA configuration
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: true
+    open-in-view: false
     properties:
       hibernate:
         format_sql: true
-  
-  # H2 Console (for development)
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+        jdbc:
+          time_zone: UTC
   
   # Email configuration (will be configured with environment variables)
   mail:
@@ -73,28 +59,4 @@ app:
     firebase:
       enabled: false
 
----
-# Production profile
-spring:
-  config:
-    activate:
-      on-profile: prod
-  datasource:
-    url: jdbc:mysql://localhost:3306/sportsmanager
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: ${DB_USERNAME:sportsmanager}
-    password: ${DB_PASSWORD:}
-  jpa:
-    database-platform: org.hibernate.dialect.MySQLDialect
-    hibernate:
-      ddl-auto: validate
-    show-sql: false
-  h2:
-    console:
-      enabled: false
-
-logging:
-  level:
-    com.pds.sportsmanager: INFO
-    org.springframework.security: WARN
-    org.hibernate.SQL: WARN 
+ 

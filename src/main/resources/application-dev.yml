@@ -1,0 +1,30 @@
+# Configuración para desarrollo - Supabase PostgreSQL
+spring:
+  datasource:
+    url: jdbc:postgresql://db.avtmdjyliuqqoouqzhpo.supabase.co:5432/postgres
+    username: postgres
+    password: ${SUPABASE_PASSWORD:your-db-password-here}
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    format_sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          time_zone: UTC
+
+# Supabase configuration for development
+supabase:
+  url: https://avtmdjyliuqqoouqzhpo.supabase.co
+  anon-key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2dG1kanlsaXVxcW9vdXF6aHBvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3MDUwMzYsImV4cCI6MjA2NTI4MTAzNn0.LKY_VXH04mmf24nnsJQUFJw3w95udswO953ZkgbSJQM
+        
+# Logging
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    com.pds.sportsmanager: DEBUG 
