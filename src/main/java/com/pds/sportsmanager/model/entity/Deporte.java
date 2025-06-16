@@ -37,9 +37,13 @@ public class Deporte {
     @Column(length = 500)
     private String descripcion;
 
-    @Positive(message = "La cantidad de jugadores debe ser positiva")
-    @Column(name = "jugadores_por_equipo", nullable = false)
-    private Integer jugadoresPorEquipo;
+    @Positive(message = "La cantidad mínima de jugadores debe ser positiva")
+    @Column(name = "min_jugadores_por_equipo", nullable = false)
+    private Integer minJugadoresPorEquipo;
+
+    @Positive(message = "La cantidad máxima de jugadores debe ser positiva")
+    @Column(name = "max_jugadores_por_equipo", nullable = false)
+    private Integer maxJugadoresPorEquipo;
 
     @Column(name = "duracion_estandar_minutos")
     private Integer duracionEstandarMinutos;
@@ -48,15 +52,17 @@ public class Deporte {
     @ToString.Exclude
     private List<Partido> partidos = new ArrayList<>();
 
-    public Deporte(String nombre, Integer jugadoresPorEquipo) {
+    public Deporte(String nombre, Integer minJugadoresPorEquipo, Integer maxJugadoresPorEquipo) {
         this.nombre = nombre;
-        this.jugadoresPorEquipo = jugadoresPorEquipo;
+        this.minJugadoresPorEquipo = minJugadoresPorEquipo;
+        this.maxJugadoresPorEquipo = maxJugadoresPorEquipo;
     }
 
-    public Deporte(String nombre, String descripcion, Integer jugadoresPorEquipo, Integer duracionEstandarMinutos) {
+    public Deporte(String nombre, String descripcion, Integer minJugadoresPorEquipo, Integer maxJugadoresPorEquipo, Integer duracionEstandarMinutos) {
         this.nombre = nombre;
         this.descripcion = descripcion;
-        this.jugadoresPorEquipo = jugadoresPorEquipo;
+        this.minJugadoresPorEquipo = minJugadoresPorEquipo;
+        this.maxJugadoresPorEquipo = maxJugadoresPorEquipo;
         this.duracionEstandarMinutos = duracionEstandarMinutos;
     }
 } 
