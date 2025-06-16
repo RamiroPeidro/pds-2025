@@ -19,6 +19,8 @@ import java.util.concurrent.CompletableFuture;
 public class NotificadorEmail implements Notificador {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+    private final EmailAdapter emailAdapter;
     
     //TODO: Inyectar EmailService o JavaMailSender
 
