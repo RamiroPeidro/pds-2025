@@ -81,14 +81,12 @@ supabase:
 
 app:
   firebase:
-    service-account-key: ${FIREBASE_SERVICE_ACCOUNT_KEY:}
+    service-account-key: classpath:${FIREBASE_SERVICE_ACCOUNT_KEY:}
   notification:
     email:
       enabled: true
     firebase:
       enabled: false
 
-firebase:
-  credentials-path: classpath:sports-manager-efe0a-firebase-adminsdk-fbsvc-c8bd3c7a88.json
 
  

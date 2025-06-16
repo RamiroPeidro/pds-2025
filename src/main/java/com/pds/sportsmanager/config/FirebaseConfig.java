@@ -12,7 +12,7 @@ import java.io.IOException;
 @Configuration
 public class FirebaseConfig {
 
-    @Value("${firebase.credentials-path}")
+    @Value("${app.firebase.service-account-key}")
     private Resource credentials;
 
     @PostConstruct
