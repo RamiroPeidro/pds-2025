@@ -264,7 +264,7 @@ public class EmparejamientoPorCercania implements EstrategiaEmparejamiento {
     public static EmparejamientoPorCercania conDistanciaPersonalizada() {
         var criteriosCustom = CriteriosPuntuacion.builder()
                 .distancia(PuntuacionDistancia.builder()
-                        .muyerca(120.0)
+                        .muycerca(120.0)
                         .cerca(100.0)
                         .media(80.0)
                         .lejos(60.0)
@@ -282,7 +282,7 @@ public class EmparejamientoPorCercania implements EstrategiaEmparejamiento {
         return EmparejamientoPorCercania.builder()
                 .criterios(CriteriosPuntuacion.builder()
                         .distancia(PuntuacionDistancia.builder()
-                                .muyerca(150.0)
+                                .muycerca(150.0)
                                 .cerca(130.0)
                                 .build())
                         .deporteFavorito(25.0)
