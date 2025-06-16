@@ -72,4 +72,7 @@ app:
     firebase:
       enabled: false
 
+firebase:
+  credentials-path: classpath:sports-manager-efe0a-firebase-adminsdk-fbsvc-c8bd3c7a88.json
+
  
