@@ -166,8 +166,16 @@ public class Partido {
         this.estado.finalizarPartido(this);
     }
 
+    public void iniciarPartido() {
+        this.estado.iniciarPartido(this);
+    }
+
     public boolean necesitaJugadores() {
         return jugadores.size() < cantidadJugadoresRequeridos;
+    }
+
+    public int getMaxJugadores() {
+        return cantidadJugadoresRequeridos;
     }
 
     public int jugadoresFaltantes() {

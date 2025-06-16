@@ -23,11 +23,11 @@ public class EmparejamientoPorCercania implements EstrategiaEmparejamiento {
      */
     @Builder
     public record CriteriosPuntuacion(
-            @Builder.Default PuntuacionDistancia distancia,
-            @Builder.Default PuntuacionNivel nivel,
-            @Builder.Default PuntuacionJugadores jugadores,
-            @Builder.Default double deporteFavorito,
-            @Builder.Default double sinUbicacion
+            PuntuacionDistancia distancia,
+            PuntuacionNivel nivel,
+            PuntuacionJugadores jugadores,
+            double deporteFavorito,
+            double sinUbicacion
     ) {
         public CriteriosPuntuacion {
             if (distancia == null) distancia = PuntuacionDistancia.defaultConfig();
@@ -46,12 +46,12 @@ public class EmparejamientoPorCercania implements EstrategiaEmparejamiento {
      */
     @Builder
     public record PuntuacionDistancia(
-            @Builder.Default double muycerca,
-            @Builder.Default double cerca,
-            @Builder.Default double media,
-            @Builder.Default double lejos,
-            @Builder.Default double muyLejos,
-            @Builder.Default double fueraRango
+            double muycerca,
+            double cerca,
+            double media,
+            double lejos,
+            double muyLejos,
+            double fueraRango
     ) {
         public PuntuacionDistancia {
             if (muycerca == 0.0) muycerca = 100.0;
@@ -97,8 +97,8 @@ public class EmparejamientoPorCercania implements EstrategiaEmparejamiento {
      */
     @Builder
     public record PuntuacionNivel(
-            @Builder.Default double compatible,
-            @Builder.Default double abierto
+            double compatible,
+            double abierto
     ) { 
         public PuntuacionNivel {
             if (compatible == 0.0) compatible = 15.0;
@@ -116,9 +116,9 @@ public class EmparejamientoPorCercania implements EstrategiaEmparejamiento {
      */
     @Builder
     public record PuntuacionJugadores(
-            @Builder.Default double casiCompleto,
-            @Builder.Default double parcialmenteCompleto,
-            @Builder.Default double pocosJugadores
+            double casiCompleto,
+            double parcialmenteCompleto,
+            double pocosJugadores
     ) {
         // Constructor compact para defaults
         public PuntuacionJugadores {
@@ -218,12 +218,7 @@ public class EmparejamientoPorCercania implements EstrategiaEmparejamiento {
         }
     }
 
-    @Builder.Default
     private final CriteriosPuntuacion criterios = CriteriosPuntuacion.defaultConfig();
-
-    public EmparejamientoPorCercania() {
-        this.criterios = CriteriosPuntuacion.defaultConfig();
-    }
 
     @Override
     public String getNombre() {
@@ -255,38 +250,53 @@ public class EmparejamientoPorCercania implements EstrategiaEmparejamiento {
 
 
     public static EmparejamientoPorCercania conCriterios(CriteriosPuntuacion criteriosPersonalizados) {
-        return EmparejamientoPorCercania.builder()
-                .criterios(criteriosPersonalizados)
-                .build();
+        EmparejamientoPorCercania estrategia = EmparejamientoPorCercania.builder().build();
+        return estrategia;
     }
 
 
     public static EmparejamientoPorCercania conDistanciaPersonalizada() {
-        var criteriosCustom = CriteriosPuntuacion.builder()
-                .distancia(PuntuacionDistancia.builder()
-                        .muyerca(120.0)
-                        .cerca(100.0)
-                        .media(80.0)
-                        .lejos(60.0)
-                        .muyLejos(30.0)
-                        .fueraRango(10.0)
-                        .build())
+        PuntuacionDistancia distancia = PuntuacionDistancia.builder()
+                .muycerca(120.0)
+                .cerca(100.0)
+                .media(80.0)
+                .lejos(60.0)
+                .muyLejos(30.0)
+                .fueraRango(10.0)
+                .build();
+        PuntuacionNivel nivel = PuntuacionNivel.defaultConfig();
+        PuntuacionJugadores jugadores = PuntuacionJugadores.defaultConfig();
+        CriteriosPuntuacion criteriosCustom = CriteriosPuntuacion.builder()
+                .distancia(distancia)
+                .nivel(nivel)
+                .jugadores(jugadores)
+                .deporteFavorito(10.0)
+                .sinUbicacion(5.0)
                 .build();
                 
-        return EmparejamientoPorCercania.builder()
-                .criterios(criteriosCustom)
-                .build();
+        EmparejamientoPorCercania estrategia = EmparejamientoPorCercania.builder().build();
+        return estrategia;
     }
 
     public static EmparejamientoPorCercania paraTorneos() {
-        return EmparejamientoPorCercania.builder()
-                .criterios(CriteriosPuntuacion.builder()
-                        .distancia(PuntuacionDistancia.builder()
-                                .muyerca(150.0)
-                                .cerca(130.0)
-                                .build())
-                        .deporteFavorito(25.0)
-                        .build())
+        PuntuacionDistancia distancia = PuntuacionDistancia.builder()
+                .muycerca(150.0)
+                .cerca(130.0)
+                .media(70.0)
+                .lejos(50.0)
+                .muyLejos(20.0)
+                .fueraRango(5.0)
                 .build();
+        PuntuacionNivel nivel = PuntuacionNivel.defaultConfig();
+        PuntuacionJugadores jugadores = PuntuacionJugadores.defaultConfig();
+        CriteriosPuntuacion criterios = CriteriosPuntuacion.builder()
+                .distancia(distancia)
+                .nivel(nivel)
+                .jugadores(jugadores)
+                .deporteFavorito(25.0)
+                .sinUbicacion(5.0)
+                .build();
+        EmparejamientoPorCercania estrategia = EmparejamientoPorCercania.builder().build();
+        return estrategia;
     }
 } 

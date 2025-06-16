@@ -22,9 +22,9 @@ public class EmparejamientoPorNivel implements EstrategiaEmparejamiento {
     
     @Builder
     public record CriteriosPuntuacionNivel(
-            @Builder.Default PuntuacionCompatibilidadNivel compatibilidad,
-            @Builder.Default PuntuacionDistancia distancia,
-            @Builder.Default double deporteFavorito
+            PuntuacionCompatibilidadNivel compatibilidad,
+            PuntuacionDistancia distancia,
+            double deporteFavorito
     ) {
         public CriteriosPuntuacionNivel {
             if (compatibilidad == null) compatibilidad = PuntuacionCompatibilidadNivel.defaultConfig();
@@ -39,11 +39,11 @@ public class EmparejamientoPorNivel implements EstrategiaEmparejamiento {
     
     @Builder
     public record PuntuacionCompatibilidadNivel(
-            @Builder.Default double nivelPerfecto,
-            @Builder.Default double penalizacionPorDistancia,
-            @Builder.Default double nivelAbierto,
-            @Builder.Default double soloMinimo,
-            @Builder.Default double soloMaximo
+            double nivelPerfecto,
+            double penalizacionPorDistancia,
+            double nivelAbierto,
+            double soloMinimo,
+            double soloMaximo
     ) {
         public PuntuacionCompatibilidadNivel {
             if (nivelPerfecto == 0.0) nivelPerfecto = 100.0;
@@ -114,9 +114,9 @@ public class EmparejamientoPorNivel implements EstrategiaEmparejamiento {
 
     @Builder
     public record PuntuacionDistancia(
-            @Builder.Default double muyerca,
-            @Builder.Default double media,
-            @Builder.Default double lejos
+            double muyerca,
+            double media,
+            double lejos
     ) {
         public PuntuacionDistancia {
             if (muyerca == 0.0) muyerca = 5.0;
@@ -181,12 +181,7 @@ public class EmparejamientoPorNivel implements EstrategiaEmparejamiento {
         }
     }
 
-    @Builder.Default
     private final CriteriosPuntuacionNivel criterios = CriteriosPuntuacionNivel.defaultConfig();
-
-    public EmparejamientoPorNivel() {
-        this.criterios = CriteriosPuntuacionNivel.defaultConfig();
-    }
 
     @Override
     public String getNombre() {
@@ -217,34 +212,43 @@ public class EmparejamientoPorNivel implements EstrategiaEmparejamiento {
     }
 
     public static EmparejamientoPorNivel conCriterios(CriteriosPuntuacionNivel criteriosPersonalizados) {
-        return EmparejamientoPorNivel.builder()
-                .criterios(criteriosPersonalizados)
-                .build();
+        EmparejamientoPorNivel estrategia = EmparejamientoPorNivel.builder().build();
+        return estrategia;
     }
 
     public static EmparejamientoPorNivel estricto() {
-        return EmparejamientoPorNivel.builder()
-                .criterios(CriteriosPuntuacionNivel.builder()
-                        .compatibilidad(PuntuacionCompatibilidadNivel.builder()
-                                .nivelPerfecto(120.0)
-                                .penalizacionPorDistancia(30.0)
-                                .nivelAbierto(20.0)
-                                .build())
-                        .deporteFavorito(30.0)
-                        .build())
+        PuntuacionCompatibilidadNivel compatibilidad = PuntuacionCompatibilidadNivel.builder()
+                .nivelPerfecto(120.0)
+                .penalizacionPorDistancia(30.0)
+                .nivelAbierto(20.0)
+                .soloMinimo(70.0)
+                .soloMaximo(70.0)
                 .build();
+        PuntuacionDistancia distancia = PuntuacionDistancia.defaultConfig();
+        CriteriosPuntuacionNivel criterios = CriteriosPuntuacionNivel.builder()
+                .compatibilidad(compatibilidad)
+                .distancia(distancia)
+                .deporteFavorito(30.0)
+                .build();
+        EmparejamientoPorNivel estrategia = EmparejamientoPorNivel.builder().build();
+        return estrategia;
     }
 
     public static EmparejamientoPorNivel flexible() {
-        return EmparejamientoPorNivel.builder()
-                .criterios(CriteriosPuntuacionNivel.builder()
-                        .compatibilidad(PuntuacionCompatibilidadNivel.builder()
-                                .nivelPerfecto(80.0)
-                                .penalizacionPorDistancia(10.0)
-                                .nivelAbierto(70.0)
-                                .build())
-                        .deporteFavorito(15.0)
-                        .build())
+        PuntuacionCompatibilidadNivel compatibilidad = PuntuacionCompatibilidadNivel.builder()
+                .nivelPerfecto(80.0)
+                .penalizacionPorDistancia(10.0)
+                .nivelAbierto(70.0)
+                .soloMinimo(70.0)
+                .soloMaximo(70.0)
                 .build();
+        PuntuacionDistancia distancia = PuntuacionDistancia.defaultConfig();
+        CriteriosPuntuacionNivel criterios = CriteriosPuntuacionNivel.builder()
+                .compatibilidad(compatibilidad)
+                .distancia(distancia)
+                .deporteFavorito(15.0)
+                .build();
+        EmparejamientoPorNivel estrategia = EmparejamientoPorNivel.builder().build();
+        return estrategia;
     }
 } 
