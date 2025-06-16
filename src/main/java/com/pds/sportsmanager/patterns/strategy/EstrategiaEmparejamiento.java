@@ -9,7 +9,8 @@ public interface EstrategiaEmparejamiento {
     
     String getNombre();
     String getDescripcion();
-    
+
+    /**
      * @param usuario Usuario que busca partidos
      * @param partidosDisponibles Lista de partidos disponibles
      */
