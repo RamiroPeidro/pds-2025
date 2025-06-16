@@ -41,7 +41,7 @@ public class PartidoConfirmado implements EstadoPartido {
     }
 
     @Override
-    public void iniciarPartido(Partido partido) {
+    public void enJuego(Partido partido) {
         LocalDateTime ahora = LocalDateTime.now();
         if (ahora.isBefore(partido.getFechaHora())) {
             throw new IllegalStateException("Aún no es la hora del partido");

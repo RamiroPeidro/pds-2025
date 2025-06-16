@@ -41,7 +41,7 @@ public interface EstadoPartido {
     /**
      * Inicia el partido automáticamente cuando llega la hora
      */
-    void iniciarPartido(Partido partido);
+    void enJuego(Partido partido);
     
     /**
      * Factory method para crear estados desde el nombre
