@@ -273,7 +273,7 @@ public class EmparejamientoPorCercania implements EstrategiaEmparejamiento {
                 .deporteFavorito(10.0)
                 .sinUbicacion(5.0)
                 .build();
-                
+
         EmparejamientoPorCercania estrategia = EmparejamientoPorCercania.builder().build();
         return estrategia;
     }

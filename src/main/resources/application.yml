@@ -81,11 +81,12 @@ supabase:
 
 app:
   firebase:
-    service-account-key: ${FIREBASE_SERVICE_ACCOUNT_KEY:}
+    service-account-key: classpath:${FIREBASE_SERVICE_ACCOUNT_KEY:}
   notification:
     email:
       enabled: true
     firebase:
       enabled: false
+
 
  

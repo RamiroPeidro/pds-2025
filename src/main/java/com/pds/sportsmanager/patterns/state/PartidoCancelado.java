@@ -39,7 +39,7 @@ public class PartidoCancelado implements EstadoPartido {
     }
 
     @Override
-    public void iniciarPartido(Partido partido) {
+    public void enJuego(Partido partido) {
         throw new IllegalStateException("No se puede iniciar un partido cancelado");
     }
 } 

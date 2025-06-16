@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -20,13 +21,20 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
+            .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authz -> authz
-                .anyRequest().permitAll() 
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/h2-console/**").permitAll()
+                .requestMatchers("/swagger-ui/**").permitAll()
+                .requestMatchers("/api-docs/**").permitAll()
+                .requestMatchers("/actuator/health").permitAll()
+                
+                .requestMatchers("/api/**").authenticated()
+                
+                .anyRequest().authenticated()
             )
-            .headers(headers -> headers.frameOptions().disable())
-            .httpBasic(httpBasic -> httpBasic.disable()) 
-            .formLogin(form -> form.disable()); 
+            .headers(AbstractHttpConfigurer::disable)
+            .httpBasic(httpBasic -> {});
 
         return http.build();
     }

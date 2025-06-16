@@ -157,6 +157,9 @@ public class Partido {
     public void confirmarPartido() {
         this.estado.confirmarPartido(this);
     }
+    public void enJuego() {
+        this.estado.enJuego(this);
+    }
 
     public void cancelarPartido() {
         this.estado.cancelarPartido(this);
@@ -167,7 +170,7 @@ public class Partido {
     }
 
     public void iniciarPartido() {
-        this.estado.iniciarPartido(this);
+        this.estado.enJuego(this);
     }
 
     public boolean necesitaJugadores() {
@@ -186,15 +189,12 @@ public class Partido {
         if (nivelMinimo == null && nivelMaximo == null) {
             return true;
         }
-        
+
         if (nivelMinimo != null && nivel.ordinal() < nivelMinimo.ordinal()) {
             return false;
         }
-        
-        if (nivelMaximo != null && nivel.ordinal() > nivelMaximo.ordinal()) {
-            return false;
-        }
-        
-        return true;
+
+        return nivelMaximo == null || nivel.ordinal() <= nivelMaximo.ordinal();
     }
-} 
+
+}

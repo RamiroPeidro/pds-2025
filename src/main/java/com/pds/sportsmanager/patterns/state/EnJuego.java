@@ -41,7 +41,7 @@ public class EnJuego implements EstadoPartido {
     }
 
     @Override
-    public void iniciarPartido(Partido partido) {
+    public void enJuego(Partido partido) {
         throw new IllegalStateException("El partido ya está en juego");
     }
 } 
