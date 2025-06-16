@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
 
 /**
  * Notificador concreto para envío de emails
@@ -50,7 +49,14 @@ public class NotificadorEmail implements Notificador {
     @Override
     public boolean estaHabilitado() {
         //TODO: Verificar configuración, credenciales, etc.
-        return true;
+        // hacer una verificación más robusta
+        if (emailAdapter == null) {
+            log.warn("EmailAdapter no configurado, NotificadorEmail deshabilitado");
+            return false;
+        }
+        boolean habilitado = emailAdapter.estaHabilitado();
+        log.debug("NotificadorEmail habilitado: {}", habilitado);
+        return habilitado;
     }
 
     /**
