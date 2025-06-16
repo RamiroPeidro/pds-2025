@@ -22,18 +22,11 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/h2-console/**").permitAll()
-                .requestMatchers("/swagger-ui/**").permitAll()
-                .requestMatchers("/api-docs/**").permitAll()
-                .requestMatchers("/actuator/health").permitAll()
-                
-                .requestMatchers("/api/**").authenticated()
-                
-                .anyRequest().authenticated()
+                .anyRequest().permitAll() 
             )
-            .headers(headers -> headers.frameOptions().disable()) 
-            .httpBasic(httpBasic -> {}); 
+            .headers(headers -> headers.frameOptions().disable())
+            .httpBasic(httpBasic -> httpBasic.disable()) 
+            .formLogin(form -> form.disable()); 
 
         return http.build();
     }

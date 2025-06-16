@@ -41,12 +41,21 @@ spring:
           starttls:
             enable: true
 
-  # Security configuration
-  security:
-    user:
-      name: admin
-      password: admin123
-      roles: ADMIN
+  # Security configuration - Disabled for development
+  # security:
+  #   user:
+  #     name: admin
+  #     password: admin123
+  #     roles: ADMIN
+
+# Management and Actuator configuration
+management:
+  health:
+    mail:
+      enabled: false
+  endpoint:
+    health:
+      show-details: when-authorized
 
 # Logging configuration
 logging:
