@@ -180,7 +180,7 @@ public class PartidoService {
         
         for (Partido partido : partidosParaIniciar) {
             try {
-                partido.iniciarPartido();
+                partido.enJuego();
                 partidoRepository.save(partido);
                 notificacionService.notificarPartidoEnJuego(partido);
                 logger.info("Partido {} iniciado automáticamente", partido.getId());
