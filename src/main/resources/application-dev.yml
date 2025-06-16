@@ -1,0 +1,31 @@
+spring:
+  # Development profile using H2 database
+  datasource:
+    url: jdbc:h2:mem:sportsmanager
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+  
+  # JPA configuration for H2
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+  
+  # H2 Console
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+# Logging for development
+logging:
+  level:
+    com.pds.sportsmanager: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG 

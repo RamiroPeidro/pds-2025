@@ -1,12 +1,19 @@
 spring:
   application:
     name: sports-manager
-  # Database configuration - Supabase PostgreSQL
+  # Database configuration - Supabase PostgreSQL (Supavisor Session Mode)
   datasource:
-    url: jdbc:postgresql://db.avtmdjyliuqqoouqzhpo.supabase.co:5432/postgres
-    username: postgres
+    url: jdbc:postgresql://aws-0-sa-east-1.pooler.supabase.com:5432/postgres?sslmode=require&prepareThreshold=0
+    username: postgres.avtmdjyliuqqoouqzhpo
     password: ${SUPABASE_PASSWORD}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 60000
+      validation-timeout: 10000
+      idle-timeout: 300000
+      max-lifetime: 900000
+      minimum-idle: 1
+      maximum-pool-size: 5
   
   # JPA configuration
   jpa:
