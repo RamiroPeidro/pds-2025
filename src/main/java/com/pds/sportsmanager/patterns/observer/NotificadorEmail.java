@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Notificador concreto para envío de emails
@@ -21,8 +22,6 @@ public class NotificadorEmail implements Notificador {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private final EmailAdapter emailAdapter;
-    
-    //TODO: Inyectar EmailService o JavaMailSender
 
     @Override
     public void notificar(NotificacionEvent evento) {
@@ -64,7 +63,6 @@ public class NotificadorEmail implements Notificador {
         for (String destinatario : evento.destinatarios()) {
             try {
                 enviarEmailIndividual(destinatario, asunto, cuerpoHtml);
-                log.debug("Email enviado exitosamente a: {}", destinatario);
             } catch (Exception e) {
                 log.error("Error enviando email a {}: {}", destinatario, e.getMessage());
             }
@@ -136,8 +134,11 @@ public class NotificadorEmail implements Notificador {
      * Simula el envío de email individual
      */
     private void enviarEmailIndividual(String destinatario, String asunto, String cuerpoHtml) {
-        //TODO: Enviar email usando JavaMailSender o un servicio externo
-        log.info("📧 EMAIL ENVIADO - Para: {} | Asunto: {}", destinatario, asunto);
-        
+        try {
+            emailAdapter.enviarNotificacion(destinatario, asunto, cuerpoHtml);
+            log.info("📧 EMAIL ENVIADO - Para: {} | Asunto: {}", destinatario, asunto);
+        } catch (Exception e) {
+            log.error("Error al enviar email: {}", e.getMessage());
+        }
     }
 } 
