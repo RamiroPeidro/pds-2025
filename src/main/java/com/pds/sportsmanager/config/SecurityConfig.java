@@ -23,11 +23,18 @@ public class SecurityConfig {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authz -> authz
-                .anyRequest().permitAll()
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/h2-console/**").permitAll()
+                .requestMatchers("/swagger-ui/**").permitAll()
+                .requestMatchers("/api-docs/**").permitAll()
+                .requestMatchers("/actuator/health").permitAll()
+                
+                .requestMatchers("/api/**").authenticated()
+                
+                .anyRequest().authenticated()
             )
-            .headers(headers -> headers.frameOptions().disable())
-            .httpBasic(httpBasic -> httpBasic.disable())
-            .formLogin(form -> form.disable());
+            .headers(AbstractHttpConfigurer::disable)
+            .httpBasic(httpBasic -> {});
 
         return http.build();
     }
