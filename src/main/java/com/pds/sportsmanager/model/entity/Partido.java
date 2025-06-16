@@ -170,7 +170,7 @@ public class Partido {
     }
 
     public void iniciarPartido() {
-        this.estado.iniciarPartido(this);
+        this.estado.enJuego(this);
     }
 
     public boolean necesitaJugadores() {
