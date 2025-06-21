@@ -1,6 +1,6 @@
 package com.pds.sportsmanager.service;
 
-import com.pds.sportsmanager.model.entity.Usuario;
+import com.pds.sportsmanager.model.entity.Jugador;
 import com.pds.sportsmanager.repository.UsuarioRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,65 +30,65 @@ public class UsuarioService {
     /**
      * Registra un nuevo usuario
      */
-    public Usuario registrarUsuario(Usuario usuario) {
-        logger.info("Registrando nuevo usuario: {}", usuario.getNombreUsuario());
+    public Jugador registrarUsuario(Jugador jugador) {
+        logger.info("Registrando nuevo jugador: {}", jugador.getNombre());
         
         // Validaciones de negocio
-        validarUsuarioParaRegistro(usuario);
+        validarUsuarioParaRegistro(jugador);
         
         // Encriptar contraseña
-        usuario.setContrasenia(passwordEncoder.encode(usuario.getContrasenia()));
+        jugador.setContrasenia(passwordEncoder.encode(jugador.getContrasenia()));
         
         // Guardar usuario
-        Usuario usuarioGuardado = usuarioRepository.save(usuario);
+        Jugador jugadorGuardado = usuarioRepository.save(jugador);
         
-        logger.info("Usuario registrado exitosamente con ID: {}", usuarioGuardado.getId());
-        return usuarioGuardado;
+        logger.info("Usuario registrado exitosamente con ID: {}", jugadorGuardado.getId());
+        return jugadorGuardado;
     }
 
     /**
      * Actualiza un usuario existente
      */
-    public Usuario actualizarUsuario(Long id, Usuario usuarioActualizado) {
+    public Jugador actualizarUsuario(Long id, Jugador jugadorActualizado) {
         logger.info("Actualizando usuario con ID: {}", id);
         
-        Usuario usuarioExistente = obtenerUsuarioPorId(id);
+        Jugador jugadorExistente = obtenerUsuarioPorId(id);
         
         // Actualizar campos permitidos
-        if (usuarioActualizado.getNombreUsuario() != null && 
-            !usuarioActualizado.getNombreUsuario().equals(usuarioExistente.getNombreUsuario())) {
+        if (jugadorActualizado.getNombre() != null &&
+            !jugadorActualizado.getNombre().equals(jugadorExistente.getNombre())) {
             
-            if (usuarioRepository.existsByNombreUsuario(usuarioActualizado.getNombreUsuario())) {
+            if (usuarioRepository.existsByNombreUsuario(jugadorActualizado.getNombre())) {
                 throw new IllegalArgumentException("El nombre de usuario ya está en uso");
             }
-            usuarioExistente.setNombreUsuario(usuarioActualizado.getNombreUsuario());
+            jugadorExistente.setNombre(jugadorActualizado.getNombre());
         }
         
-        if (usuarioActualizado.getEmail() != null && 
-            !usuarioActualizado.getEmail().equals(usuarioExistente.getEmail())) {
+        if (jugadorActualizado.getEmail() != null &&
+            !jugadorActualizado.getEmail().equals(jugadorExistente.getEmail())) {
             
-            if (usuarioRepository.existsByEmail(usuarioActualizado.getEmail())) {
+            if (usuarioRepository.existsByEmail(jugadorActualizado.getEmail())) {
                 throw new IllegalArgumentException("El email ya está en uso");
             }
-            usuarioExistente.setEmail(usuarioActualizado.getEmail());
+            jugadorExistente.setEmail(jugadorActualizado.getEmail());
         }
         
-        if (usuarioActualizado.getNivelDeJugador() != null) {
-            usuarioExistente.setNivelDeJugador(usuarioActualizado.getNivelDeJugador());
+        if (jugadorActualizado.getNivelDeJuego() != null) {
+            jugadorExistente.setNivelDeJuego(jugadorActualizado.getNivelDeJuego());
         }
         
-        if (usuarioActualizado.getDeporteFavorito() != null) {
-            usuarioExistente.setDeporteFavorito(usuarioActualizado.getDeporteFavorito());
+        if (jugadorActualizado.getDeporteFavorito() != null) {
+            jugadorExistente.setDeporteFavorito(jugadorActualizado.getDeporteFavorito());
         }
         
-        if (usuarioActualizado.getUbicacion() != null) {
-            usuarioExistente.setUbicacion(usuarioActualizado.getUbicacion());
+        if (jugadorActualizado.getUbicacion() != null) {
+            jugadorExistente.setUbicacion(jugadorActualizado.getUbicacion());
         }
         
-        Usuario usuarioGuardado = usuarioRepository.save(usuarioExistente);
+        Jugador jugadorGuardado = usuarioRepository.save(jugadorExistente);
         logger.info("Usuario actualizado exitosamente");
         
-        return usuarioGuardado;
+        return jugadorGuardado;
     }
 
     /**
@@ -97,9 +97,9 @@ public class UsuarioService {
     public void actualizarContrasenia(Long id, String nuevaContrasenia) {
         logger.info("Actualizando contraseña para usuario ID: {}", id);
         
-        Usuario usuario = obtenerUsuarioPorId(id);
-        usuario.setContrasenia(passwordEncoder.encode(nuevaContrasenia));
-        usuarioRepository.save(usuario);
+        Jugador jugador = obtenerUsuarioPorId(id);
+        jugador.setContrasenia(passwordEncoder.encode(nuevaContrasenia));
+        usuarioRepository.save(jugador);
         
         logger.info("Contraseña actualizada exitosamente");
     }
@@ -108,7 +108,7 @@ public class UsuarioService {
      * Busca un usuario por nombre de usuario
      */
     @Transactional(readOnly = true)
-    public Optional<Usuario> buscarPorNombreUsuario(String nombreUsuario) {
+    public Optional<Jugador> buscarPorNombreUsuario(String nombreUsuario) {
         return usuarioRepository.findByNombreUsuario(nombreUsuario);
     }
 
@@ -116,7 +116,7 @@ public class UsuarioService {
      * Busca un usuario por email
      */
     @Transactional(readOnly = true)
-    public Optional<Usuario> buscarPorEmail(String email) {
+    public Optional<Jugador> buscarPorEmail(String email) {
         return usuarioRepository.findByEmail(email);
     }
 
@@ -124,7 +124,7 @@ public class UsuarioService {
      * Obtiene un usuario por ID
      */
     @Transactional(readOnly = true)
-    public Usuario obtenerUsuarioPorId(Long id) {
+    public Jugador obtenerUsuarioPorId(Long id) {
         return usuarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
     }
@@ -133,7 +133,7 @@ public class UsuarioService {
      * Obtiene todos los usuarios
      */
     @Transactional(readOnly = true)
-    public List<Usuario> obtenerTodosLosUsuarios() {
+    public List<Jugador> obtenerTodosLosUsuarios() {
         return usuarioRepository.findAll();
     }
 
@@ -141,7 +141,7 @@ public class UsuarioService {
      * Busca usuarios cercanos a una ubicación
      */
     @Transactional(readOnly = true)
-    public List<Usuario> buscarUsuariosCercanos(Double latitud, Double longitud, Double radioKm) {
+    public List<Jugador> buscarUsuariosCercanos(Double latitud, Double longitud, Double radioKm) {
         return usuarioRepository.findUsuariosCercanos(latitud, longitud, radioKm);
     }
 
@@ -149,7 +149,7 @@ public class UsuarioService {
      * Busca usuarios activos
      */
     @Transactional(readOnly = true)
-    public List<Usuario> buscarUsuariosActivos() {
+    public List<Jugador> buscarUsuariosActivos() {
         return usuarioRepository.findUsuariosActivos();
     }
 
@@ -159,21 +159,21 @@ public class UsuarioService {
     public void eliminarUsuario(Long id) {
         logger.info("Eliminando usuario con ID: {}", id);
         
-        Usuario usuario = obtenerUsuarioPorId(id);
+        Jugador jugador = obtenerUsuarioPorId(id);
         
         // Verificar que no tenga partidos activos
-        Long partidosActivos = usuarioRepository.findById(id)
-                .map(u -> u.getPartidosParticipando().stream()
-                        .filter(p -> !p.getEstadoNombre().equals("PARTIDO_FINALIZADO") && 
-                                   !p.getEstadoNombre().equals("PARTIDO_CANCELADO"))
+        long partidosActivos = usuarioRepository.findById(id)
+                .map(u -> u.getPartidos().stream()
+                        .filter(p -> !p.getEstado().equals("PARTIDO_FINALIZADO") &&
+                                !p.getEstado().equals("PARTIDO_CANCELADO"))
                         .count())
                 .orElse(0L);
-        
+
         if (partidosActivos > 0) {
             throw new IllegalStateException("No se puede eliminar un usuario con partidos activos");
         }
         
-        usuarioRepository.delete(usuario);
+        usuarioRepository.delete(jugador);
         logger.info("Usuario eliminado exitosamente");
     }
 
@@ -182,7 +182,7 @@ public class UsuarioService {
      */
     @Transactional(readOnly = true)
     public boolean validarContrasenia(String nombreUsuario, String contrasenia) {
-        Optional<Usuario> usuario = buscarPorNombreUsuario(nombreUsuario);
+        Optional<Jugador> usuario = buscarPorNombreUsuario(nombreUsuario);
         
         if (usuario.isPresent()) {
             return passwordEncoder.matches(contrasenia, usuario.get().getContrasenia());
@@ -210,16 +210,16 @@ public class UsuarioService {
     /**
      * Validaciones de negocio para el registro de usuario
      */
-    private void validarUsuarioParaRegistro(Usuario usuario) {
-        if (usuarioRepository.existsByNombreUsuario(usuario.getNombreUsuario())) {
+    private void validarUsuarioParaRegistro(Jugador jugador) {
+        if (usuarioRepository.existsByNombreUsuario(jugador.getNombre())) {
             throw new IllegalArgumentException("El nombre de usuario ya está en uso");
         }
         
-        if (usuarioRepository.existsByEmail(usuario.getEmail())) {
+        if (usuarioRepository.existsByEmail(jugador.getEmail())) {
             throw new IllegalArgumentException("El email ya está registrado");
         }
         
-        if (usuario.getContrasenia() == null || usuario.getContrasenia().length() < 6) {
+        if (jugador.getContrasenia() == null || jugador.getContrasenia().length() < 6) {
             throw new IllegalArgumentException("La contraseña debe tener al menos 6 caracteres");
         }
     }

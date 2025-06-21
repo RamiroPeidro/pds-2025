@@ -1,7 +1,7 @@
 package com.pds.sportsmanager.patterns.state;
 
 import com.pds.sportsmanager.model.entity.Partido;
-import com.pds.sportsmanager.model.entity.Usuario;
+import com.pds.sportsmanager.model.entity.Jugador;
 
 import java.time.LocalDateTime;
 
@@ -21,7 +21,7 @@ public class PartidoConfirmado implements EstadoPartido {
     }
 
     @Override
-    public void agregarJugador(Partido partido, Usuario jugador) {
+    public void agregarJugador(Partido partido, Jugador jugador) {
         throw new IllegalStateException("No se pueden agregar jugadores a un partido confirmado");
     }
 

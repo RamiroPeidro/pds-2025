@@ -1,7 +1,7 @@
 package com.pds.sportsmanager.patterns.state;
 
+import com.pds.sportsmanager.model.entity.Jugador;
 import com.pds.sportsmanager.model.entity.Partido;
-import com.pds.sportsmanager.model.entity.Usuario;
 
 import static com.pds.sportsmanager.patterns.state.EstadoPartidoFactory.*;
 
@@ -21,7 +21,7 @@ public class NecesitamosJugadores implements EstadoPartido {
     }
 
     @Override
-    public void agregarJugador(Partido partido, Usuario jugador) {  
+    public void agregarJugador(Partido partido, Jugador jugador) {
         partido.getJugadores().add(jugador);
         
         if (partido.getJugadores().size() >= partido.getMaxJugadores()) {

@@ -1,7 +1,7 @@
 package com.pds.sportsmanager.model.dto;
 
 import com.pds.sportsmanager.model.entity.Ubicacion;
-import com.pds.sportsmanager.model.enums.NivelDeJugador;
+import com.pds.sportsmanager.model.enums.NivelDeJuego;
 
 import java.time.LocalDateTime;
 
@@ -16,8 +16,8 @@ public record PartidoBusquedaResult(
     Integer duracionMinutos,
     Ubicacion ubicacion,
     String organizador,
-    NivelDeJugador nivelMinimo,
-    NivelDeJugador nivelMaximo,
+    NivelDeJuego nivelMinimo,
+    NivelDeJuego nivelMaximo,
     String estado,
     Double distanciaKm 
 ) {
@@ -39,7 +39,7 @@ public record PartidoBusquedaResult(
     /**
      * Verifica si un nivel de jugador es compatible con este partido
      */
-    public boolean esNivelCompatible(NivelDeJugador nivel) {
+    public boolean esNivelCompatible(NivelDeJuego nivel) {
         if (nivelMinimo == null && nivelMaximo == null) {
             return true;
         }

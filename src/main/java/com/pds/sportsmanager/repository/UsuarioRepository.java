@@ -1,7 +1,7 @@
 package com.pds.sportsmanager.repository;
 
-import com.pds.sportsmanager.model.entity.Usuario;
-import com.pds.sportsmanager.model.enums.NivelDeJugador;
+import com.pds.sportsmanager.model.entity.Jugador;
+import com.pds.sportsmanager.model.enums.NivelDeJuego;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,50 +11,50 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
+public interface UsuarioRepository extends JpaRepository<Jugador, Long> {
     
     /**
-     * Busca un usuario por nombre de usuario
+     * Busca un jugador por nombre de jugador
      */
-    Optional<Usuario> findByNombreUsuario(String nombreUsuario);
+    Optional<Jugador> findByNombreUsuario(String nombreUsuario);
     
     /**
-     * Busca un usuario por email
+     * Busca un jugador por email
      */
-    Optional<Usuario> findByEmail(String email);
+    Optional<Jugador> findByEmail(String email);
     
     /**
-     * Verifica si existe un usuario con el nombre de usuario dado
+     * Verifica si existe un jugador con el nombre de jugador dado
      */
     boolean existsByNombreUsuario(String nombreUsuario);
     
     /**
-     * Verifica si existe un usuario con el email dado
+     * Verifica si existe un jugador con el email dado
      */
     boolean existsByEmail(String email);
     
     /**
      * Busca usuarios por nivel de jugador
      */
-    List<Usuario> findByNivelDeJugador(NivelDeJugador nivel);
+    List<Jugador> findByNivelDeJugador(NivelDeJuego nivel);
     
     /**
      * Busca usuarios por deporte favorito
      */
-    @Query("SELECT u FROM Usuario u WHERE u.deporteFavorito.id = :deporteId")
-    List<Usuario> findByDeporteFavorito(@Param("deporteId") Long deporteId);
+    @Query("SELECT u FROM Jugador u WHERE u.deporteFavorito.id = :deporteId")
+    List<Jugador> findByDeporteFavorito(@Param("deporteId") Long deporteId);
     
     /**
      * Busca usuarios cercanos a una ubicación específica
      */
     @Query("""
-        SELECT u FROM Usuario u 
+        SELECT u FROM Jugador u 
         WHERE u.ubicacion IS NOT NULL 
         AND (6371 * acos(cos(radians(:latitud)) * cos(radians(u.ubicacion.latitud)) * 
              cos(radians(u.ubicacion.longitud) - radians(:longitud)) + 
              sin(radians(:latitud)) * sin(radians(u.ubicacion.latitud)))) <= :radioKm
         """)
-    List<Usuario> findUsuariosCercanos(
+    List<Jugador> findUsuariosCercanos(
         @Param("latitud") Double latitud, 
         @Param("longitud") Double longitud, 
         @Param("radioKm") Double radioKm
@@ -63,6 +63,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     /**
      * Busca usuarios activos (que han creado al menos un partido)
      */
-    @Query("SELECT DISTINCT u FROM Usuario u WHERE SIZE(u.partidosCreados) > 0")
-    List<Usuario> findUsuariosActivos();
+    @Query("SELECT DISTINCT u FROM Jugador u WHERE SIZE(u.partidosCreados) > 0")
+    List<Jugador> findUsuariosActivos();
 } 
