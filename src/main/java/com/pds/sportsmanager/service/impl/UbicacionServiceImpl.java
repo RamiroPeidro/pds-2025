@@ -3,7 +3,7 @@ package com.pds.sportsmanager.service.impl;
 import com.pds.sportsmanager.model.entity.Ubicacion;
 import com.pds.sportsmanager.repository.UbicacionRepository;
 import com.pds.sportsmanager.service.UbicacionService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,14 +12,10 @@ import java.util.Optional;
 
 @Service
 @Transactional
+@AllArgsConstructor
 public class UbicacionServiceImpl implements UbicacionService {
 
     private final UbicacionRepository ubicacionRepository;
-
-    @Autowired
-    public UbicacionServiceImpl(UbicacionRepository ubicacionRepository) {
-        this.ubicacionRepository = ubicacionRepository;
-    }
 
     @Override
     public Ubicacion crearUbicacion(Ubicacion ubicacion) {
@@ -39,17 +35,14 @@ public class UbicacionServiceImpl implements UbicacionService {
     }
 
     @Override
-    public Ubicacion actualizarUbicacion(Long id, Ubicacion ubicacionActualizada) {
+    public Optional<Ubicacion> actualizarUbicacion(Long id, Ubicacion ubicacionActualizada) {
         return ubicacionRepository.findById(id)
                 .map(ubicacionExistente -> {
-                    Ubicacion nuevaUbicacion = new Ubicacion(
-                        ubicacionActualizada.direccion(),
-                        ubicacionActualizada.latitud(),
-                        ubicacionActualizada.longitud()
-                    );
-                    return ubicacionRepository.save(nuevaUbicacion);
-                })
-                .orElseThrow(() -> new RuntimeException("Ubicación no encontrada con id: " + id));
+                    ubicacionExistente.setDireccion(ubicacionActualizada.getDireccion());
+                    ubicacionExistente.setLatitud(ubicacionActualizada.getLatitud());
+                    ubicacionExistente.setLongitud(ubicacionActualizada.getLongitud());
+                    return ubicacionRepository.save(ubicacionExistente);
+                });
     }
 
     @Override

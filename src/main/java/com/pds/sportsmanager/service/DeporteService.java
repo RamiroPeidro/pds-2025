@@ -10,6 +10,6 @@ public interface DeporteService {
     Optional<Deporte> obtenerDeportePorNombre(String nombre);
     List<Deporte> listarTodosLosDeportes();
     List<Deporte> buscarDeportesPorCantidadJugadores(Integer minJugadores, Integer maxJugadores);
-    Deporte actualizarDeporte(Long id, Deporte deporte);
+    Optional<Deporte> actualizarDeporte(Long id, Deporte deporte);
     void eliminarDeporte(Long id);
 } 

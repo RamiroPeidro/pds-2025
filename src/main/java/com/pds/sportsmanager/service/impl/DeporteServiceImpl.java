@@ -3,7 +3,7 @@ package com.pds.sportsmanager.service.impl;
 import com.pds.sportsmanager.model.entity.Deporte;
 import com.pds.sportsmanager.repository.DeporteRepository;
 import com.pds.sportsmanager.service.DeporteService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,14 +12,10 @@ import java.util.Optional;
 
 @Service
 @Transactional
+@AllArgsConstructor
 public class DeporteServiceImpl implements DeporteService {
 
     private final DeporteRepository deporteRepository;
-
-    @Autowired
-    public DeporteServiceImpl(DeporteRepository deporteRepository) {
-        this.deporteRepository = deporteRepository;
-    }
 
     @Override
     public Deporte crearDeporte(Deporte deporte) {
@@ -52,7 +48,7 @@ public class DeporteServiceImpl implements DeporteService {
     }
 
     @Override
-    public Deporte actualizarDeporte(Long id, Deporte deporteActualizado) {
+    public Optional<Deporte> actualizarDeporte(Long id, Deporte deporteActualizado) {
         return deporteRepository.findById(id)
                 .map(deporteExistente -> {
                     deporteExistente.setNombre(deporteActualizado.getNombre());
@@ -61,8 +57,7 @@ public class DeporteServiceImpl implements DeporteService {
                     deporteExistente.setMaxJugadoresPorEquipo(deporteActualizado.getMaxJugadoresPorEquipo());
                     deporteExistente.setDuracionEstandarMinutos(deporteActualizado.getDuracionEstandarMinutos());
                     return deporteRepository.save(deporteExistente);
-                })
-                .orElseThrow(() -> new RuntimeException("Deporte no encontrado con id: " + id));
+                });
     }
 
     @Override

@@ -8,6 +8,6 @@ public interface UbicacionService {
     Ubicacion crearUbicacion(Ubicacion ubicacion);
     Optional<Ubicacion> obtenerUbicacionPorId(Long id);
     List<Ubicacion> listarTodasLasUbicaciones();
-    Ubicacion actualizarUbicacion(Long id, Ubicacion ubicacion);
+    Optional<Ubicacion> actualizarUbicacion(Long id, Ubicacion ubicacion);
     void eliminarUbicacion(Long id);
 } 
