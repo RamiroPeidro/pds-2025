@@ -2,9 +2,7 @@ package com.pds.sportsmanager.controller;
 
 import com.pds.sportsmanager.model.entity.Ubicacion;
 import com.pds.sportsmanager.service.UbicacionService;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Builder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,43 +11,44 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/ubicaciones")
-@AllArgsConstructor
 public class UbicacionController {
 
     private final UbicacionService ubicacionService;
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class UbicacionInputDTO {
-        private String direccion;
-        private Double latitud;
-        private Double longitud;
+    public UbicacionController(UbicacionService ubicacionService) {
+        this.ubicacionService = ubicacionService;
     }
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class UbicacionOutputDTO {
-        private Long id;
-        private String direccion;
-        private Double latitud;
-        private Double longitud;
+    @Builder
+    public static record UbicacionInputDTO(
+        String direccion,
+        Double latitud,
+        Double longitud
+    ) {}
 
+    @Builder
+    public static record UbicacionOutputDTO(
+        Long id,
+        String direccion,
+        Double latitud,
+        Double longitud
+    ) {
         public UbicacionOutputDTO(Ubicacion ubicacion) {
-            this.id = ubicacion.getId();
-            this.direccion = ubicacion.getDireccion();
-            this.latitud = ubicacion.getLatitud();
-            this.longitud = ubicacion.getLongitud();
+            this(
+                ubicacion.getId(),
+                ubicacion.getDireccion(),
+                ubicacion.getLatitud(),
+                ubicacion.getLongitud()
+            );
         }
     }
 
     @PostMapping
     public ResponseEntity<UbicacionOutputDTO> crearUbicacion(@RequestBody UbicacionInputDTO ubicacionDTO) {
         Ubicacion ubicacion = new Ubicacion();
-        ubicacion.setDireccion(ubicacionDTO.getDireccion());
-        ubicacion.setLatitud(ubicacionDTO.getLatitud());
-        ubicacion.setLongitud(ubicacionDTO.getLongitud());
+        ubicacion.setDireccion(ubicacionDTO.direccion());
+        ubicacion.setLatitud(ubicacionDTO.latitud());
+        ubicacion.setLongitud(ubicacionDTO.longitud());
         Ubicacion nuevaUbicacion = ubicacionService.crearUbicacion(ubicacion);
         return ResponseEntity.ok(new UbicacionOutputDTO(nuevaUbicacion));
     }
@@ -74,9 +73,9 @@ public class UbicacionController {
             @PathVariable Long id,
             @RequestBody UbicacionInputDTO ubicacionDTO) {
         Ubicacion ubicacion = new Ubicacion();
-        ubicacion.setDireccion(ubicacionDTO.getDireccion());
-        ubicacion.setLatitud(ubicacionDTO.getLatitud());
-        ubicacion.setLongitud(ubicacionDTO.getLongitud());
+        ubicacion.setDireccion(ubicacionDTO.direccion());
+        ubicacion.setLatitud(ubicacionDTO.latitud());
+        ubicacion.setLongitud(ubicacionDTO.longitud());
 
         return ubicacionService.actualizarUbicacion(id, ubicacion)
                 .map(ubicacionActualizada -> ResponseEntity.ok(new UbicacionOutputDTO(ubicacionActualizada)))
