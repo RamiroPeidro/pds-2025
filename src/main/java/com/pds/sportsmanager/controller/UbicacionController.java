@@ -32,16 +32,7 @@ public class UbicacionController {
         String direccion,
         Double latitud,
         Double longitud
-    ) {
-        public UbicacionOutputDTO(Ubicacion ubicacion) {
-            this(
-                ubicacion.getId(),
-                ubicacion.getDireccion(),
-                ubicacion.getLatitud(),
-                ubicacion.getLongitud()
-            );
-        }
-    }
+    ) {}
 
     @PostMapping
     public ResponseEntity<UbicacionOutputDTO> crearUbicacion(@RequestBody UbicacionInputDTO ubicacionDTO) {
@@ -50,20 +41,35 @@ public class UbicacionController {
         ubicacion.setLatitud(ubicacionDTO.latitud());
         ubicacion.setLongitud(ubicacionDTO.longitud());
         Ubicacion nuevaUbicacion = ubicacionService.crearUbicacion(ubicacion);
-        return ResponseEntity.ok(new UbicacionOutputDTO(nuevaUbicacion));
+        return ResponseEntity.ok(UbicacionOutputDTO.builder()
+                .id(nuevaUbicacion.getId())
+                .direccion(nuevaUbicacion.getDireccion())
+                .latitud(nuevaUbicacion.getLatitud())
+                .longitud(nuevaUbicacion.getLongitud())
+                .build());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UbicacionOutputDTO> obtenerUbicacionPorId(@PathVariable Long id) {
         return ubicacionService.obtenerUbicacionPorId(id)
-                .map(ubicacion -> ResponseEntity.ok(new UbicacionOutputDTO(ubicacion)))
+                .map(ubicacion -> ResponseEntity.ok(UbicacionOutputDTO.builder()
+                        .id(ubicacion.getId())
+                        .direccion(ubicacion.getDireccion())
+                        .latitud(ubicacion.getLatitud())
+                        .longitud(ubicacion.getLongitud())
+                        .build()))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping
     public ResponseEntity<List<UbicacionOutputDTO>> listarTodasLasUbicaciones() {
         List<UbicacionOutputDTO> dtoList = ubicacionService.listarTodasLasUbicaciones().stream()
-                .map(UbicacionOutputDTO::new)
+                .map(ubicacion -> UbicacionOutputDTO.builder()
+                        .id(ubicacion.getId())
+                        .direccion(ubicacion.getDireccion())
+                        .latitud(ubicacion.getLatitud())
+                        .longitud(ubicacion.getLongitud())
+                        .build())
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtoList);
     }
@@ -78,7 +84,12 @@ public class UbicacionController {
         ubicacion.setLongitud(ubicacionDTO.longitud());
 
         return ubicacionService.actualizarUbicacion(id, ubicacion)
-                .map(ubicacionActualizada -> ResponseEntity.ok(new UbicacionOutputDTO(ubicacionActualizada)))
+                .map(ubicacionActualizada -> ResponseEntity.ok(UbicacionOutputDTO.builder()
+                        .id(ubicacionActualizada.getId())
+                        .direccion(ubicacionActualizada.getDireccion())
+                        .latitud(ubicacionActualizada.getLatitud())
+                        .longitud(ubicacionActualizada.getLongitud())
+                        .build()))
                 .orElse(ResponseEntity.notFound().build());
     }
 
