@@ -25,6 +25,8 @@ public record UsuarioRequestDTO(
     Long deporteFavoritoId,
     
     @Valid
-    Ubicacion ubicacion
+    Ubicacion ubicacion,
+
+    PreferenciaDTO preferenciaDTO
 ) {
 } 

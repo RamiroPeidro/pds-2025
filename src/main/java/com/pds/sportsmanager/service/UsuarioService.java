@@ -1,5 +1,6 @@
 package com.pds.sportsmanager.service;
 
+import com.pds.sportsmanager.model.entity.PreferenciaNotificacion;
 import com.pds.sportsmanager.model.entity.Usuario;
 import com.pds.sportsmanager.repository.UsuarioRepository;
 import org.slf4j.Logger;
@@ -38,7 +39,9 @@ public class UsuarioService {
         
         // Encriptar contraseña
         usuario.setContrasenia(passwordEncoder.encode(usuario.getContrasenia()));
-        
+
+        // Inicializar preferencias de notificación
+
         // Guardar usuario
         Usuario usuarioGuardado = usuarioRepository.save(usuario);
         
