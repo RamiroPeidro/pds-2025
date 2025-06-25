@@ -83,6 +83,9 @@ public class Usuario {
     @ToString.Exclude  
     private List<Comentarios> comentarios = new ArrayList<>();
 
+    @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private PreferenciaNotificacion preferenciaNotificacion;
+
     public Usuario(String nombreUsuario, String email, String contrasenia) {
         this.nombreUsuario = nombreUsuario;
         this.email = email;
