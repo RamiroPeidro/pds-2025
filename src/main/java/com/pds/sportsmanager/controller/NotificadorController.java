@@ -37,6 +37,12 @@ public class NotificadorController {
     }
 
     @PostMapping("/registrar")
+    public String registrarNotificador(@RequestParam String tipo) {
+        notificacionService.crearNotificadorPorTipo(tipo);
+        return "Notificador registrado exitosamente";
+    }
+
+    @PostMapping("/registrar-notificador")
     public String registrarNotificador(@RequestBody Notificador notificador) {
         notificacionService.agregarNotificador(notificador);
         return "Notificador registrado exitosamente";

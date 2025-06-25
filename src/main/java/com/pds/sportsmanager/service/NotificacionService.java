@@ -5,7 +5,9 @@ import com.pds.sportsmanager.model.entity.PreferenciaNotificacion;
 import com.pds.sportsmanager.model.enums.TipoNotificacion;
 import com.pds.sportsmanager.patterns.observer.NotificacionEvent;
 import com.pds.sportsmanager.patterns.observer.Notificador;
+import com.pds.sportsmanager.patterns.observer.NotificadorFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -21,13 +23,16 @@ import java.util.stream.Collectors;
 public class NotificacionService {
 
     private final List<Notificador> notificadores = new ArrayList<>();
+    @Autowired
+    private NotificadorFactory notificadorFactory;
     /**
      * Constructor por defecto
      */
     private final PreferenciaNotificacionServiceImpl preferenciasService;
 
-    public NotificacionService(PreferenciaNotificacionServiceImpl preferenciasService) {
+    public NotificacionService(PreferenciaNotificacionServiceImpl preferenciasService, NotificadorFactory notificadorFactory) {
         this.preferenciasService = preferenciasService;
+        this.notificadorFactory = notificadorFactory;
     }
 
 
@@ -273,4 +278,15 @@ public class NotificacionService {
     public int getNumeroNotificadores() {
         return notificadores.size();
     }
-} 
+
+    /**
+     * Crea un notificador basado en el tipo
+     */
+    public void crearNotificadorPorTipo(String tipo) {
+        Notificador notificador = notificadorFactory.crearPorTipo(tipo);
+        if (notificador != null) {
+            agregarNotificador(notificador);
+        }
+    }
+
+}
