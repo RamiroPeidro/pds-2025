@@ -47,4 +47,7 @@ public interface DeporteRepository extends JpaRepository<Deporte, Long> {
         ORDER BY d.nombre ASC
         """)
     List<Deporte> findDeportesConPartidosActivos();
+
+    List<Deporte> findByMinJugadoresPorEquipoLessThanEqualAndMaxJugadoresPorEquipoGreaterThanEqual(
+            Integer minJugadores, Integer maxJugadores);
 } 

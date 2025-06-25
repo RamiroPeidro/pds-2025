@@ -56,7 +56,8 @@ public class Partido {
     @Column(name = "cantidad_jugadores_requeridos", nullable = false)
     private Integer cantidadJugadoresRequeridos;
 
-    @Embedded
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "ubicacion_id", nullable = false)
     @NotNull(message = "La ubicación es obligatoria")
     private Ubicacion ubicacion;
 
