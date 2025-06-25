@@ -1,12 +1,15 @@
 package com.pds.sportsmanager.patterns.observer;
 
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.FirebaseMessagingException;
+import com.google.firebase.messaging.Message;
+import com.google.firebase.messaging.Notification;
 import com.pds.sportsmanager.model.entity.PreferenciaNotificacion;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import java.time.format.DateTimeFormatter;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -19,12 +22,10 @@ import java.util.concurrent.CompletableFuture;
 @ConditionalOnProperty(name = "notificaciones.firebase.habilitado", havingValue = "true", matchIfMissing = true)
 public class NotificadorFirebase implements Notificador {
 
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-    
-   // Inyectar FirebaseMessaging
+    // Inyectar FirebaseMessaging
 
     @Override
-    public void notificar(NotificacionEvent evento, PreferenciaNotificacion preferencia) {
+    public void notificar(NotificacionEvent evento) {
 
         log.info("Enviando notificación push: {} a {} dispositivos", 
                 evento.tipo(), evento.destinatarios().size());
@@ -58,15 +59,16 @@ public class NotificadorFirebase implements Notificador {
      */
     private void enviarNotificacionesAsincrono(NotificacionEvent evento) {
         var notificacionData = crearNotificacionData(evento);
+        log.debug("Datos de notificación creados: {}", notificacionData);
 
-        for (String token : evento.destinatarios()) {
+        for (String emails : evento.destinatarios()) {
             try {
-                enviarNotificacionIndividual(token, notificacionData);
+                enviarNotificacionIndividual(emails, notificacionData);
                 log.debug("Push notification enviada exitosamente a token: {}***", 
-                         token.substring(0, Math.min(10, token.length())));
+                         emails.substring(0, Math.min(10, emails.length())));
             } catch (Exception e) {
                 log.error("Error enviando push notification a token {}: {}", 
-                         token.substring(0, Math.min(10, token.length())), e.getMessage());
+                         emails.substring(0, Math.min(10, emails.length())), e.getMessage());
             }
         }
     }
@@ -137,19 +139,13 @@ public class NotificadorFirebase implements Notificador {
     }
 
     /**
-     * Simula el envío de notificación push individual
-     * En un proyecto real usarías Firebase Admin SDK
+     * Envia una notificación individual a un token FCM (simulado)
      */
     private void enviarNotificacionIndividual(String token, NotificacionData data) {
-        // Simulación del envío
-        log.info("🔔 PUSH ENVIADO - Token: {}*** | Título: {} | Partido: {}", 
-                token.substring(0, Math.min(8, token.length())), 
-                data.titulo(), 
-                data.partidoId());
-        
-        //TODO: Enviar notificaciones push usando Firebase Admin SDK
+        // Simulación: solo loguea en consola
+        log.info("[SIMULADO] Notificación enviada por Firebase a token: {} | Título: {} | Cuerpo: {}",
+                token, data.titulo(), data.cuerpo());
     }
-
     /**
      * Método de utilidad para validar tokens FCM
      */
@@ -159,4 +155,4 @@ public class NotificadorFirebase implements Notificador {
                token.length() > 100 &&  
                token.matches("^[a-zA-Z0-9_:-]+$");
     }
-} 
+}

@@ -6,7 +6,6 @@ import com.pds.sportsmanager.model.enums.TipoNotificacion;
 import com.pds.sportsmanager.patterns.observer.NotificacionEvent;
 import com.pds.sportsmanager.patterns.observer.Notificador;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -233,7 +232,7 @@ public class NotificacionService {
             for (Notificador notificador : notificadores) {
                 if (notificador.estaHabilitado(pref)) {
                     try {
-                        notificador.notificar(evento,pref);
+                        notificador.notificar(evento);
                     } catch (Exception e) {
                         log.error("Error al notificar a {} por {}: {}", email, notificador.getClass().getSimpleName(), e.getMessage());
                     }

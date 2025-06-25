@@ -24,7 +24,7 @@ public class NotificadorEmail implements Notificador {
     private final EmailAdapter emailAdapter;
 
     @Override
-    public void notificar(NotificacionEvent evento, PreferenciaNotificacion preferencia) {
+    public void notificar(NotificacionEvent evento) {
 
         log.info("Enviando notificación por email: {} a {} destinatarios", 
                 evento.tipo(), evento.destinatarios().size());
