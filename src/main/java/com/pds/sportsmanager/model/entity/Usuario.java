@@ -58,7 +58,8 @@ public class Usuario {
     @ToString.Exclude  
     private Deporte deporteFavorito;
 
-    @Embedded
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "ubicacion_id", nullable = false)
     private Ubicacion ubicacion;
 
     @Column(name = "created_at")
