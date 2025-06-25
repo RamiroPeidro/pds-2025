@@ -2,12 +2,12 @@ package com.pds.sportsmanager.service;
 
 import com.pds.sportsmanager.model.entity.Partido;
 import com.pds.sportsmanager.model.entity.PreferenciaNotificacion;
+import com.pds.sportsmanager.model.entity.Usuario;
 import com.pds.sportsmanager.model.enums.TipoNotificacion;
 import com.pds.sportsmanager.patterns.observer.NotificacionEvent;
 import com.pds.sportsmanager.patterns.observer.Notificador;
 import com.pds.sportsmanager.patterns.observer.NotificadorFactory;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,8 +23,7 @@ import java.util.stream.Collectors;
 public class NotificacionService {
 
     private final List<Notificador> notificadores = new ArrayList<>();
-    @Autowired
-    private NotificadorFactory notificadorFactory;
+    private final NotificadorFactory notificadorFactory;
     /**
      * Constructor por defecto
      */
@@ -251,7 +250,7 @@ public class NotificacionService {
      */
     private List<String> obtenerEmailsJugadores(Partido partido) {
         return partido.getJugadores().stream()
-                .map(jugador -> jugador.getEmail())
+                .map(Usuario::getEmail)
                 .collect(Collectors.toList());
     }
 
@@ -270,13 +269,6 @@ public class NotificacionService {
      */
     public List<Notificador> getNotificadores() {
         return new ArrayList<>(notificadores);
-    }
-
-    /**
-     * Obtiene el número de notificadores registrados
-     */
-    public int getNumeroNotificadores() {
-        return notificadores.size();
     }
 
     /**
