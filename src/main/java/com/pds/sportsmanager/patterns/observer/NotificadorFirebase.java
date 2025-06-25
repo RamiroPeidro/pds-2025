@@ -146,13 +146,4 @@ public class NotificadorFirebase implements Notificador {
         log.info("[SIMULADO] Notificación enviada por Firebase a token: {} | Título: {} | Cuerpo: {}",
                 token, data.titulo(), data.cuerpo());
     }
-    /**
-     * Método de utilidad para validar tokens FCM
-     */
-    private boolean esTokenValido(String token) {
-        // Validación básica de formato de token FCM
-        return token != null && 
-               token.length() > 100 &&  
-               token.matches("^[a-zA-Z0-9_:-]+$");
-    }
 }
