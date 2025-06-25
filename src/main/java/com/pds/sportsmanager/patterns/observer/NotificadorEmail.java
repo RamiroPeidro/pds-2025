@@ -1,5 +1,6 @@
 package com.pds.sportsmanager.patterns.observer;
 
+import com.pds.sportsmanager.model.entity.PreferenciaNotificacion;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -23,8 +24,8 @@ public class NotificadorEmail implements Notificador {
     private final EmailAdapter emailAdapter;
 
     @Override
-    public void notificar(NotificacionEvent evento) {
-        if (!estaHabilitado()) {
+    public void notificar(NotificacionEvent evento, PreferenciaNotificacion preferencia) {
+        if (!estaHabilitado(preferencia)) {
             log.debug("Notificador Email deshabilitado, saltando envío");
             return;
         }
@@ -47,16 +48,14 @@ public class NotificadorEmail implements Notificador {
     }
 
     @Override
-    public boolean estaHabilitado() {
+    public boolean estaHabilitado(PreferenciaNotificacion preferencia) {
         //TODO: Verificar configuración, credenciales, etc.
         // hacer una verificación más robusta
         if (emailAdapter == null) {
             log.warn("EmailAdapter no configurado, NotificadorEmail deshabilitado");
             return false;
         }
-        boolean habilitado = emailAdapter.estaHabilitado();
-        log.debug("NotificadorEmail habilitado: {}", habilitado);
-        return habilitado;
+        return preferencia.estaHabilitadaEmail();
     }
 
     /**

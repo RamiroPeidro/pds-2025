@@ -1,5 +1,6 @@
 package com.pds.sportsmanager.patterns.observer;
 
+import com.pds.sportsmanager.model.entity.PreferenciaNotificacion;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -23,8 +24,8 @@ public class NotificadorFirebase implements Notificador {
    //TODO: Inyectar FirebaseMessaging
 
     @Override
-    public void notificar(NotificacionEvent evento) {
-        if (!estaHabilitado()) {
+    public void notificar(NotificacionEvent evento, PreferenciaNotificacion preferencia) {
+        if (!estaHabilitado(preferencia)) {
             log.debug("Notificador Firebase deshabilitado, saltando envío");
             return;
         }
@@ -47,8 +48,12 @@ public class NotificadorFirebase implements Notificador {
     }
 
     @Override
-    public boolean estaHabilitado() {
+    public boolean estaHabilitado(PreferenciaNotificacion preferencia) {
         //TODO: Verificar configuración Firebase, tokens, etc.
+        if (preferencia == null || !preferencia.estaHabilitadaPush()) {
+            log.debug("Preferencias de notificación deshabilitadas o no encontradas");
+            return false;
+        }
         return true;
     }
 

@@ -22,4 +22,9 @@ public record NotificacionEvent(
     public static NotificacionEvent of(TipoNotificacion tipo, String mensaje, List<String> destinatarios, Long partidoId) {
         return new NotificacionEvent(tipo, mensaje, destinatarios, partidoId, LocalDateTime.now());
     }
+
+    public List<String> getDestinatarios() {
+        return destinatarios.stream()
+                .toList();
+    }
 } 

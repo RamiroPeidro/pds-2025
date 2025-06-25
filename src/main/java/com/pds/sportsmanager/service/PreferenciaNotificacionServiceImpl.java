@@ -18,4 +18,12 @@ public class PreferenciaNotificacionServiceImpl implements PreferenciaNotificaci
     public Optional<PreferenciaNotificacion> obtenerPorUsuarioId(Long usuarioId) {
         return repository.findByUsuarioId(usuarioId);
     }
+
+    @Override
+    public Optional<PreferenciaNotificacion> obtenerPorEmail(String email) {
+        return repository.findByUsuarioEmail(email);
+    }
+
+
+
 }

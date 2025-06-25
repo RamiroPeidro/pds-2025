@@ -1,6 +1,7 @@
 package com.pds.sportsmanager.service;
 
 import com.pds.sportsmanager.model.entity.Partido;
+import com.pds.sportsmanager.model.entity.PreferenciaNotificacion;
 import com.pds.sportsmanager.model.enums.TipoNotificacion;
 import com.pds.sportsmanager.patterns.observer.NotificacionEvent;
 import com.pds.sportsmanager.patterns.observer.Notificador;
@@ -223,12 +224,20 @@ public class NotificacionService {
      * Notifica a todos los observadores registrados
      */
     private void notificarTodos(NotificacionEvent evento) {
-        for (Notificador notificador : notificadores) {
-            try {
-                notificador.notificar(evento);
-            } catch (Exception e) {
-                log.error("Error al enviar notificación con {}: {}", 
-                           notificador.getClass().getSimpleName(), e.getMessage());
+        for (String email : evento.getDestinatarios()) {
+            log.info("Notificando a: {}", email);
+
+            PreferenciaNotificacion pref = preferenciasService.obtenerPorEmail(email)
+                    .orElse(PreferenciaNotificacion.porDefecto());
+
+            for (Notificador notificador : notificadores) {
+                if (notificador.estaHabilitado(pref)) {
+                    try {
+                        notificador.notificar(evento,pref); // evento individualizado
+                    } catch (Exception e) {
+                        log.error("Error al notificar a {} por {}: {}", email, notificador.getClass().getSimpleName(), e.getMessage());
+                    }
+                }
             }
         }
     }

@@ -24,4 +24,17 @@ public class PreferenciaNotificacion {
 
     @Column(nullable = false, columnDefinition = "boolean default false")
     private boolean push = false;
+
+
+    public static PreferenciaNotificacion porDefecto() {
+        return new PreferenciaNotificacion();
+    }
+
+    public boolean estaHabilitadaEmail() {
+        return email;
+    }
+    public boolean estaHabilitadaPush() {
+        return push;
+    }
+
 }
