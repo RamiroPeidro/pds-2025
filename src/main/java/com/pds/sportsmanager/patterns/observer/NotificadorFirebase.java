@@ -21,14 +21,10 @@ public class NotificadorFirebase implements Notificador {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     
-   //TODO: Inyectar FirebaseMessaging
+   // Inyectar FirebaseMessaging
 
     @Override
     public void notificar(NotificacionEvent evento, PreferenciaNotificacion preferencia) {
-        if (!estaHabilitado(preferencia)) {
-            log.debug("Notificador Firebase deshabilitado, saltando envío");
-            return;
-        }
 
         log.info("Enviando notificación push: {} a {} dispositivos", 
                 evento.tipo(), evento.destinatarios().size());
@@ -49,7 +45,7 @@ public class NotificadorFirebase implements Notificador {
 
     @Override
     public boolean estaHabilitado(PreferenciaNotificacion preferencia) {
-        //TODO: Verificar configuración Firebase, tokens, etc.
+        //Verificar configuración Firebase, tokens, etc.
         if (preferencia == null || !preferencia.estaHabilitadaPush()) {
             log.debug("Preferencias de notificación deshabilitadas o no encontradas");
             return false;
@@ -58,7 +54,7 @@ public class NotificadorFirebase implements Notificador {
     }
 
     /**
-     * TODO: Enviar notificaciones push usando Firebase Admin SDK
+     * Enviar notificaciones push usando Firebase Admin SDK
      */
     private void enviarNotificacionesAsincrono(NotificacionEvent evento) {
         var notificacionData = crearNotificacionData(evento);

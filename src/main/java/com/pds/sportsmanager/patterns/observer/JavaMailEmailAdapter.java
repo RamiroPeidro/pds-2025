@@ -28,18 +28,4 @@ public class JavaMailEmailAdapter implements EmailAdapter {
         }
     }
 
-    @Override
-    public boolean estaHabilitado() {
-        if (mailSender == null) {
-            return false;
-        }
-        try {
-            // check de conexión
-            MimeMessage testMsg = mailSender.createMimeMessage();
-            return true;
-        } catch (Exception e) {
-            // config mal o no disponible
-            return false;
-        }
-    }
 }

@@ -233,7 +233,7 @@ public class NotificacionService {
             for (Notificador notificador : notificadores) {
                 if (notificador.estaHabilitado(pref)) {
                     try {
-                        notificador.notificar(evento,pref); // evento individualizado
+                        notificador.notificar(evento,pref);
                     } catch (Exception e) {
                         log.error("Error al notificar a {} por {}: {}", email, notificador.getClass().getSimpleName(), e.getMessage());
                     }

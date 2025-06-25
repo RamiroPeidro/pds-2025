@@ -25,10 +25,6 @@ public class NotificadorEmail implements Notificador {
 
     @Override
     public void notificar(NotificacionEvent evento, PreferenciaNotificacion preferencia) {
-        if (!estaHabilitado(preferencia)) {
-            log.debug("Notificador Email deshabilitado, saltando envío");
-            return;
-        }
 
         log.info("Enviando notificación por email: {} a {} destinatarios", 
                 evento.tipo(), evento.destinatarios().size());
@@ -49,8 +45,6 @@ public class NotificadorEmail implements Notificador {
 
     @Override
     public boolean estaHabilitado(PreferenciaNotificacion preferencia) {
-        //TODO: Verificar configuración, credenciales, etc.
-        // hacer una verificación más robusta
         if (emailAdapter == null) {
             log.warn("EmailAdapter no configurado, NotificadorEmail deshabilitado");
             return false;
