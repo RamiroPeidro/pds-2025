@@ -56,7 +56,8 @@ public class Partido {
     @Column(name = "cantidad_jugadores_requeridos", nullable = false)
     private Integer cantidadJugadoresRequeridos;
 
-    @Embedded
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "ubicacion_id", nullable = false)
     @NotNull(message = "La ubicación es obligatoria")
     private Ubicacion ubicacion;
 
@@ -101,7 +102,7 @@ public class Partido {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Transient
+    @Transient // No se mapea en ninguna columna
     private EstadoPartido estado;
 
     @Column(name = "estado_nombre")
@@ -119,7 +120,7 @@ public class Partido {
         this.ubicacion = ubicacion;
         this.deporte = deporte;
         this.owner = owner;
-        this.jugadores.add(owner); 
+        this.jugadores.add(owner);
     }
 
     @PostLoad

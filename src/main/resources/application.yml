@@ -88,5 +88,12 @@ app:
     firebase:
       enabled: false
 
+jwt:
+  # clave secreta en Base64 (32 bytes → 256 bits)
+  # ponla en una variable de entorno para producción
+  secret: ${APP_JWT_SECRET:C9SxDf9tcg7hDio9uS9pTiZcxVhNwt0IzSDov6KmD08=
+
+  # tiempo de validez en milisegundos (ej. 1 h = 3 600 000 ms)
+  expiration-ms: ${APP_JWT_EXPIRATION_MS:3600000}
 
  

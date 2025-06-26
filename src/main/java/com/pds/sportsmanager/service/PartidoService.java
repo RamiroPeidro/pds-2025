@@ -1,10 +1,13 @@
 package com.pds.sportsmanager.service;
 
+import com.pds.sportsmanager.dtos.partido.AgregarJugadorDto;
+import com.pds.sportsmanager.dtos.partido.PartidoDto;
 import com.pds.sportsmanager.model.dto.PartidoBusquedaResult;
 import com.pds.sportsmanager.model.entity.Partido;
 import com.pds.sportsmanager.model.entity.Usuario;
 import com.pds.sportsmanager.patterns.strategy.EstrategiaEmparejamiento;
 import com.pds.sportsmanager.repository.PartidoRepository;
+import com.pds.sportsmanager.repository.UsuarioRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,25 +28,42 @@ public class PartidoService {
     private final PartidoRepository partidoRepository;
     private final UsuarioService usuarioService;
     private final NotificacionService notificacionService;
+    private final UsuarioRepository usuarioRepository;
 
     @Autowired
-    public PartidoService(PartidoRepository partidoRepository, 
-                         UsuarioService usuarioService,
-                         NotificacionService notificacionService) {
+    public PartidoService(PartidoRepository partidoRepository,
+                          UsuarioService usuarioService,
+                          NotificacionService notificacionService, UsuarioRepository usuarioRepository) {
         this.partidoRepository = partidoRepository;
         this.usuarioService = usuarioService;
         this.notificacionService = notificacionService;
+        this.usuarioRepository = usuarioRepository;
     }
 
     /**
-     * Crea un nuevo partido
+     * Crea un nuevo partido. FIX => Crear el partido en base a un DTO y procesar la info
      */
-    public Partido crearPartido(Partido partido) {
-        logger.info("Creando nuevo partido: {}", partido.getTitulo());
+    public Partido crearPartido(PartidoDto partidoDto) {
+        logger.info("Creando nuevo partido: {}", partidoDto.getTitulo());
         
         // Validaciones de negocio
-        validarPartido(partido);
-        
+        //validarPartido(partido);
+        // Chequear utilidad
+
+        // Obtener usuario de la db
+        Usuario owner = usuarioRepository.getById(partidoDto.getOwnerId());
+
+        // Construír objeto partido
+        Partido partido = new Partido(
+                partidoDto.getTitulo(),
+                partidoDto.getFechaHora(),
+                partidoDto.getDuracionMinutos(),
+                partidoDto.getCantidadJugadoresRequeridos(),
+                partidoDto.getUbicacion(),
+                partidoDto.getDeporte(),
+                owner
+                );
+
         // Guardar el partido
         Partido partidoGuardado = partidoRepository.save(partido);
         
@@ -57,11 +77,11 @@ public class PartidoService {
     /**
      * Agrega un jugador a un partido
      */
-    public void agregarJugadorAlPartido(Long partidoId, Long jugadorId) {
-        logger.info("Agregando jugador {} al partido {}", jugadorId, partidoId);
+    public void agregarJugadorAlPartido(AgregarJugadorDto agregarJugadorDto) {
+        logger.info("Agregando jugador {} al partido {}", agregarJugadorDto.getJugadorId(), agregarJugadorDto.getPartidoId());
         
-        Partido partido = obtenerPartidoPorId(partidoId);
-        Usuario jugador = usuarioService.obtenerUsuarioPorId(jugadorId);
+        Partido partido = obtenerPartidoPorId(agregarJugadorDto.getPartidoId());
+        Usuario jugador = usuarioService.obtenerUsuarioPorId(agregarJugadorDto.getJugadorId());
         
         // Usar el patrón State para agregar el jugador
         partido.agregarJugador(jugador);
@@ -210,7 +230,7 @@ public class PartidoService {
     /**
      * Validaciones de negocio para un partido
      */
-    private void validarPartido(Partido partido) {
+/*    private void validarPartido(Partido partido) {
         if (partido.getFechaHora().isBefore(LocalDateTime.now().plusHours(1))) {
             throw new IllegalArgumentException("La fecha del partido debe ser al menos 1 hora en el futuro");
         }
@@ -223,7 +243,7 @@ public class PartidoService {
             throw new IllegalArgumentException("La duración debe estar entre 15 y 300 minutos");
         }
     }
-
+*/
     /**
      * Convierte un Partido a PartidoBusquedaResult calculando la distancia
      */

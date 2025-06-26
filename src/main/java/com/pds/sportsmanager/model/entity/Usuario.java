@@ -4,6 +4,7 @@ import com.pds.sportsmanager.model.enums.NivelDeJugador;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -58,8 +59,11 @@ public class Usuario {
     @ToString.Exclude  
     private Deporte deporteFavorito;
 
-    @Embedded
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "ubicacion_id", nullable = false)
+    @NotNull(message = "La ubicación es obligatoria")
     private Ubicacion ubicacion;
+
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -76,11 +80,11 @@ public class Usuario {
     private List<Partido> partidosParticipando = new ArrayList<>();
 
     @OneToMany(mappedBy = "jugador", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @ToString.Exclude  
+    @ToString.Exclude
     private List<Estadisticas> estadisticas = new ArrayList<>();
 
     @OneToMany(mappedBy = "jugador", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @ToString.Exclude  
+    @ToString.Exclude
     private List<Comentarios> comentarios = new ArrayList<>();
 
     public Usuario(String nombreUsuario, String email, String contrasenia) {

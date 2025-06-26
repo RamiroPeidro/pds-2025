@@ -1,5 +1,7 @@
 package com.pds.sportsmanager.controller;
 
+import com.pds.sportsmanager.dtos.partido.AgregarJugadorDto;
+import com.pds.sportsmanager.dtos.partido.PartidoDto;
 import com.pds.sportsmanager.model.dto.PartidoBusquedaResult;
 import com.pds.sportsmanager.model.entity.Partido;
 import com.pds.sportsmanager.patterns.strategy.EstrategiaEmparejamiento;
@@ -8,6 +10,7 @@ import com.pds.sportsmanager.service.PartidoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,11 +32,11 @@ public class PartidoController {
 
     @PostMapping
     @Operation(summary = "Crear un nuevo partido", description = "Crea un partido en estado 'Necesitamos Jugadores'")
-    public ResponseEntity<Partido> crearPartido(@Valid @RequestBody Partido partido) {
+    public ResponseEntity<Partido> crearPartido(@Valid @RequestBody PartidoDto partidoDto) {
         log.info("REST: Creando nuevo partido");
         
         try {
-            Partido partidoCreado = partidoService.crearPartido(partido);
+            Partido partidoCreado = partidoService.crearPartido(partidoDto);
             return ResponseEntity.status(HttpStatus.CREATED).body(partidoCreado);
         } catch (IllegalArgumentException e) {
             log.warn("Error de validación al crear partido: {}", e.getMessage());
@@ -41,22 +44,21 @@ public class PartidoController {
         }
     }
 
-    @PostMapping("/{partidoId}/jugadores/{jugadorId}")
+    @PostMapping("/jugadores")
     @Operation(summary = "Unirse a un partido", description = "Agrega un jugador a un partido usando el patrón State")
     public ResponseEntity<String> unirseAlPartido(
-            @Parameter(description = "ID del partido") @PathVariable Long partidoId,
-            @Parameter(description = "ID del jugador") @PathVariable Long jugadorId) {
-        
-        log.info("REST: Jugador {} uniéndose al partido {}", jugadorId, partidoId);
-        
+            @Valid @RequestBody AgregarJugadorDto agregarJugadorDto) {
+
+        log.info("REST: Jugador {} uniéndose al partido {}", agregarJugadorDto.getJugadorId(), agregarJugadorDto.getPartidoId());
+
         try {
-            partidoService.agregarJugadorAlPartido(partidoId, jugadorId);
+            partidoService.agregarJugadorAlPartido(agregarJugadorDto);
             return ResponseEntity.ok("Jugador agregado exitosamente");
         } catch (IllegalStateException e) {
             log.warn("Error de estado: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-        } catch (RuntimeException e) {
-            log.error("Error al agregar jugador: {}", e.getMessage());
+        } catch (EntityNotFoundException e) {
+            log.error("No encontrado: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
