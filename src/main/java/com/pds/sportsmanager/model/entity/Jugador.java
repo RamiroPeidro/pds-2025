@@ -56,13 +56,9 @@ public class Jugador {
     @Column(name = "deporte_favorito")
     private String deporteFavorito; // Campo texto simple según DB
 
-    @ManyToMany
-    @JoinTable(
-            name = "jugador_deporte",
-            joinColumns = @JoinColumn(name = "jugador_id"),
-            inverseJoinColumns = @JoinColumn(name = "deporte_id")
-    )
-    private List<Deporte> deportesFavs;
+    @OneToMany(mappedBy = "jugador", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private List<JugadorDeporte> jugadorDeportes = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ubicacion_id")
@@ -120,10 +116,32 @@ public class Jugador {
     }
 
     // Agrega un deporte favorito si no está en la lista (según diagrama UML)
-    public void agregarDeporte(Deporte favorito) {
-        if (!deportesFavs.contains(favorito)) {
-            deportesFavs.add(favorito);
+    public void agregarDeporte(Deporte deporte, NivelDeJuego nivel, boolean esFavorito) {
+        JugadorDeporte jugadorDeporte = JugadorDeporte.builder()
+                .jugador(this)
+                .deporte(deporte)
+                .nivel(nivel)
+                .esFavorito(esFavorito)
+                .build();
+        
+        if (!jugadorDeportes.contains(jugadorDeporte)) {
+            jugadorDeportes.add(jugadorDeporte);
         }
+    }
+
+    // ✅ ACTUALIZAR: Método para obtener deportes favoritos reales
+    public List<Deporte> getDeportesFavoritos() {
+        return jugadorDeportes.stream()
+                .filter(JugadorDeporte::getEsFavorito)
+                .map(JugadorDeporte::getDeporte)
+                .toList();
+    }
+
+    // ✅ ACTUALIZAR: Método para obtener todos los deportes asociados
+    public List<Deporte> getTodosLosDeportes() {
+        return jugadorDeportes.stream()
+                .map(JugadorDeporte::getDeporte)
+                .toList();
     }
 
 }

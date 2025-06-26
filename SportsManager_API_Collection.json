@@ -1,0 +1,615 @@
+{
+	"info": {
+		"_postman_id": "sports-manager-api-2024",
+		"name": "🏆 Sports Manager API - Complete Collection",
+		"description": "Colección completa de la API Sports Manager con todos los endpoints disponibles y datos de prueba realistas.\n\n🎯 **FUNCIONALIDADES INCLUIDAS:**\n- 👥 Gestión de Jugadores (CRUD completo)\n- ⚽ Gestión de Partidos (Estados, Strategy Pattern)\n- 🏀 Gestión de Deportes\n- 📍 Gestión de Ubicaciones\n- 🔔 Sistema de Notificaciones (Observer Pattern)\n- 🎯 Estrategias de Emparejamiento (Strategy Pattern)\n\n📊 **BASE DE DATOS POBLADA:**\n- 59 Jugadores con deportes favoritos\n- 43 Partidos en diferentes estados\n- 17 Ubicaciones deportivas\n- 5 Deportes disponibles\n- Sistema de notificaciones funcional",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "👥 JUGADORES",
+			"description": "Gestión completa de jugadores con CRUD y búsquedas",
+			"item": [
+				{
+					"name": "📝 Registrar Jugador",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nombre\": \"Diego Maradona\",\n    \"email\": \"diego@futbol.com\",\n    \"contrasenia\": \"D10S1986\",\n    \"nivelDeJuego\": \"AVANZADO\",\n    \"deporteFavorito\": \"Fútbol\",\n    \"ubicacion\": {\n        \"direccion\": \"Estadio La Bombonera, Buenos Aires\",\n        \"latitud\": -34.6365,\n        \"longitud\": -58.3629\n    }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/jugadores",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "jugadores"]
+						},
+						"description": "Registra un nuevo jugador en el sistema"
+					}
+				},
+				{
+					"name": "👤 Obtener Jugador por ID",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/jugadores/13",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "jugadores", "13"]
+						},
+						"description": "Obtiene los datos de Lionel Messi (ID: 13)"
+					}
+				},
+				{
+					"name": "📋 Listar Todos los Jugadores",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/jugadores",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "jugadores"]
+						},
+						"description": "Lista todos los jugadores registrados (59 jugadores)"
+					}
+				},
+				{
+					"name": "📧 Buscar Jugador por Email",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/jugadores/buscar/email?email=messi@futbol.com",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "jugadores", "buscar", "email"],
+							"query": [
+								{
+									"key": "email",
+									"value": "messi@futbol.com"
+								}
+							]
+						},
+						"description": "Busca jugador por email específico"
+					}
+				},
+				{
+					"name": "🔍 Buscar Jugador por Nombre",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/jugadores/buscar/nombre?nombre=Lionel Messi",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "jugadores", "buscar", "nombre"],
+							"query": [
+								{
+									"key": "nombre",
+									"value": "Lionel Messi"
+								}
+							]
+						},
+						"description": "Busca jugador por nombre"
+					}
+				},
+				{
+					"name": "⚡ Jugadores Activos",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/jugadores/activos",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "jugadores", "activos"]
+						},
+						"description": "Lista jugadores con actividad reciente"
+					}
+				},
+				{
+					"name": "📍 Jugadores Cercanos",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/jugadores/cercanos?latitud=-34.6037&longitud=-58.3816&radio=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "jugadores", "cercanos"],
+							"query": [
+								{
+									"key": "latitud",
+									"value": "-34.6037",
+									"description": "Buenos Aires centro"
+								},
+								{
+									"key": "longitud",
+									"value": "-58.3816"
+								},
+								{
+									"key": "radio",
+									"value": "10",
+									"description": "Radio en km"
+								}
+							]
+						},
+						"description": "Busca jugadores cerca de una ubicación"
+					}
+				},
+				{
+					"name": "✏️ Actualizar Jugador",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nombre\": \"Lionel Messi\",\n    \"email\": \"messi@psg.com\",\n    \"contrasenia\": \"Goat2024\",\n    \"nivelDeJuego\": \"AVANZADO\",\n    \"deporteFavorito\": \"Fútbol\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/jugadores/13",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "jugadores", "13"]
+						},
+						"description": "Actualiza datos de un jugador existente"
+					}
+				},
+				{
+					"name": "🗑️ Eliminar Jugador",
+					"request": {
+						"method": "DELETE",
+						"url": {
+							"raw": "{{baseUrl}}/api/jugadores/62",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "jugadores", "62"]
+						},
+						"description": "Elimina un jugador (Franco Stupaczuk - último ID)"
+					}
+				}
+			]
+		},
+		{
+			"name": "⚽ PARTIDOS",
+			"description": "Gestión completa de partidos con State Pattern y Strategy Pattern",
+			"item": [
+				{
+					"name": "🆕 Crear Partido",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"titulo\": \"Partido de Prueba API\",\n    \"descripcion\": \"Partido creado desde Postman para probar notificaciones\",\n    \"fechaHora\": \"2025-01-10T19:00:00\",\n    \"duracionMinutos\": 90,\n    \"cantidadJugadoresRequeridos\": 10,\n    \"deporteId\": 1,\n    \"ubicacionId\": 1,\n    \"nivelMinimo\": \"PRINCIPIANTE\",\n    \"nivelMaximo\": \"AVANZADO\",\n    \"ownerId\": 13\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/partidos",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "partidos"]
+						},
+						"description": "🔔 **CREA PARTIDO + NOTIFICA**\n\nEste endpoint:\n1. Crea un nuevo partido en estado NECESITAMOS_JUGADORES\n2. **AUTOMÁTICAMENTE notifica por email** a todos los jugadores que tienen Fútbol como deporte favorito\n3. Retorna el partido creado\n\n📧 **Jugadores que recibirán notificación:**\n- Lionel Messi, Cristiano Ronaldo, Neymar Jr, y 17 más..."
+					}
+				},
+				{
+					"name": "👤 Obtener Partido por ID",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/partidos/41",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "partidos", "41"]
+						},
+						"description": "Obtiene detalles del partido 'Fútbol 5 Palermo'"
+					}
+				},
+				{
+					"name": "📋 Listar Todos los Partidos",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/partidos",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "partidos"]
+						},
+						"description": "Lista todos los partidos (43 partidos en diferentes estados)"
+					}
+				},
+				{
+					"name": "➕ Agregar Jugador al Partido",
+					"request": {
+						"method": "POST",
+						"url": {
+							"raw": "{{baseUrl}}/api/partidos/41/jugadores/27",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "partidos", "41", "jugadores", "27"]
+						},
+						"description": "🔔 **AGREGA JUGADOR + NOTIFICA**\n\nEste endpoint:\n1. Agrega Sergio Agüero al partido de Fútbol 5 Palermo\n2. **NOTIFICA JUGADOR_UNIDO** a todos los participantes del partido\n3. Si se completa el cupo → **NOTIFICA PARTIDO_ARMADO**\n4. Actualiza el estado del partido automáticamente\n\n📧 **Notificaciones enviadas:**\n- A participantes actuales: \"Sergio Agüero se unió al partido\"\n- Si se arma: \"¡Partido listo para jugar!\""
+					}
+				},
+				{
+					"name": "✅ Confirmar Partido",
+					"request": {
+						"method": "PUT",
+						"url": {
+							"raw": "{{baseUrl}}/api/partidos/43/confirmar",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "partidos", "43", "confirmar"]
+						},
+						"description": "🔔 **CONFIRMA PARTIDO + NOTIFICA**\n\nCambia estado a PARTIDO_CONFIRMADO y notifica a todos los participantes"
+					}
+				},
+				{
+					"name": "❌ Cancelar Partido",
+					"request": {
+						"method": "PUT",
+						"url": {
+							"raw": "{{baseUrl}}/api/partidos/49/cancelar",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "partidos", "49", "cancelar"]
+						},
+						"description": "🔔 **CANCELA PARTIDO + NOTIFICA**\n\nCambia estado a PARTIDO_CANCELADO y notifica a todos los participantes"
+					}
+				},
+				{
+					"name": "🏁 Finalizar Partido",
+					"request": {
+						"method": "PUT",
+						"url": {
+							"raw": "{{baseUrl}}/api/partidos/44/finalizar",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "partidos", "44", "finalizar"]
+						},
+						"description": "🔔 **FINALIZA PARTIDO + NOTIFICA**\n\nCambia estado a PARTIDO_FINALIZADO y notifica a todos los participantes"
+					}
+				},
+				{
+					"name": "🎯 Buscar Partidos - Estrategia Cercanía",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/partidos/buscar?usuarioId=13&estrategia=cercania",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "partidos", "buscar"],
+							"query": [
+								{
+									"key": "usuarioId",
+									"value": "13",
+									"description": "Lionel Messi"
+								},
+								{
+									"key": "estrategia",
+									"value": "cercania"
+								}
+							]
+						},
+						"description": "🏗️ **STRATEGY PATTERN - Emparejamiento por Cercanía**\n\nBusca partidos cercanos a la ubicación de Messi usando algoritmo de distancia geográfica"
+					}
+				},
+				{
+					"name": "🎯 Buscar Partidos - Estrategia Nivel",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/partidos/buscar?usuarioId=25&estrategia=nivel",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "partidos", "buscar"],
+							"query": [
+								{
+									"key": "usuarioId",
+									"value": "25",
+									"description": "Paulo Dybala (PRINCIPIANTE)"
+								},
+								{
+									"key": "estrategia",
+									"value": "nivel"
+								}
+							]
+						},
+						"description": "🏗️ **STRATEGY PATTERN - Emparejamiento por Nivel**\n\nBusca partidos compatibles con el nivel PRINCIPIANTE de Dybala"
+					}
+				},
+				{
+					"name": "🎯 Buscar Partidos - Estrategia Historial",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/partidos/buscar?usuarioId=28&estrategia=historial",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "partidos", "buscar"],
+							"query": [
+								{
+									"key": "usuarioId",
+									"value": "28",
+									"description": "LeBron James (Básquet)"
+								},
+								{
+									"key": "estrategia",
+									"value": "historial"
+								}
+							]
+						},
+						"description": "🏗️ **STRATEGY PATTERN - Emparejamiento por Historial**\n\nAnaliza historial de partidos, experiencia en deportes y compatibilidad con otros jugadores"
+					}
+				},
+				{
+					"name": "👥 Obtener Partidos de Usuario",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/partidos/usuario/13",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "partidos", "usuario", "13"]
+						},
+						"description": "Lista todos los partidos donde participa Lionel Messi"
+					}
+				}
+			]
+		},
+		{
+			"name": "🏀 DEPORTES",
+			"description": "Gestión de deportes disponibles",
+			"item": [
+				{
+					"name": "📋 Listar Todos los Deportes",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/deportes",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "deportes"]
+						},
+						"description": "Lista los 5 deportes disponibles: Fútbol, Básquet, Tenis, Vóley, Paddle"
+					}
+				},
+				{
+					"name": "🎯 Obtener Deporte por ID",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/deportes/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "deportes", "1"]
+						},
+						"description": "Obtiene detalles del Fútbol (ID: 1)"
+					}
+				},
+				{
+					"name": "⚽ Partidos por Deporte",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/deportes/1/partidos",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "deportes", "1", "partidos"]
+						},
+						"description": "Lista todos los partidos de Fútbol"
+					}
+				}
+			]
+		},
+		{
+			"name": "📍 UBICACIONES",
+			"description": "Gestión de ubicaciones deportivas",
+			"item": [
+				{
+					"name": "📋 Listar Todas las Ubicaciones",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/ubicaciones",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "ubicaciones"]
+						},
+						"description": "Lista las 17 ubicaciones deportivas cargadas"
+					}
+				},
+				{
+					"name": "🏟️ Obtener Ubicación por ID",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/ubicaciones/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "ubicaciones", "1"]
+						},
+						"description": "Obtiene detalles del Estadio River Plate"
+					}
+				},
+				{
+					"name": "📍 Ubicaciones Cercanas",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/ubicaciones/cercanas?latitud=-34.6037&longitud=-58.3816&radio=15",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "ubicaciones", "cercanas"],
+							"query": [
+								{
+									"key": "latitud",
+									"value": "-34.6037",
+									"description": "Buenos Aires centro"
+								},
+								{
+									"key": "longitud",
+									"value": "-58.3816"
+								},
+								{
+									"key": "radio",
+									"value": "15",
+									"description": "Radio en km"
+								}
+							]
+						},
+						"description": "Busca ubicaciones dentro de un radio específico"
+					}
+				}
+			]
+		},
+		{
+			"name": "🔔 NOTIFICACIONES",
+			"description": "Sistema de notificaciones - Observer Pattern",
+			"item": [
+				{
+					"name": "📧 Listar Notificadores",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/notificadores",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "notificadores"]
+						},
+						"description": "Lista todos los notificadores registrados: Email y Firebase"
+					}
+				},
+				{
+					"name": "📬 Estado de Notificadores",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/notificadores/estado",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "notificadores", "estado"]
+						},
+						"description": "Muestra el estado actual de todos los notificadores"
+					}
+				},
+				{
+					"name": "🔔 Enviar Notificación de Prueba",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"destinatarios\": [\"messi@futbol.com\", \"cr7@futbol.com\"],\n    \"titulo\": \"🧪 Prueba de Notificación\",\n    \"mensaje\": \"Esta es una notificación de prueba desde Postman\",\n    \"tipoNotificacion\": \"JUGADOR_UNIDO\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/notificadores/enviar",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "notificadores", "enviar"]
+						},
+						"description": "🔔 **PRUEBA MANUAL DE NOTIFICACIONES**\n\nEnvía una notificación directa a emails específicos para probar el sistema Observer"
+					}
+				}
+			]
+		},
+		{
+			"name": "📊 CASOS DE PRUEBA COMPLETOS",
+			"description": "Scenarios de prueba que combinan múltiples funcionalidades",
+			"item": [
+				{
+					"name": "🧪 Flujo Completo: Crear Partido + Agregar Jugadores",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"titulo\": \"🧪 Test Completo - Básquet 3x3\",\n    \"descripcion\": \"Partido para probar flujo completo: crear → agregar jugadores → confirmar → notificaciones\",\n    \"fechaHora\": \"2025-01-15T20:00:00\",\n    \"duracionMinutos\": 60,\n    \"cantidadJugadoresRequeridos\": 6,\n    \"deporteId\": 2,\n    \"ubicacionId\": 12,\n    \"nivelMinimo\": \"PRINCIPIANTE\",\n    \"nivelMaximo\": \"AVANZADO\",\n    \"ownerId\": 28\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/partidos",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "partidos"]
+						},
+						"description": "🎯 **FLUJO COMPLETO DE PRUEBA**\n\n**Paso 1:** Crea partido de básquet\n📧 **Notifica a:** LeBron, Curry, Durant, Giannis y 12 jugadores más de básquet\n\n**Próximos pasos:**\n1. Copiar el ID del partido creado\n2. Usar 'Agregar Jugador al Partido' con ese ID\n3. Repetir hasta completar 6 jugadores\n4. Ver cómo cambia automáticamente a PARTIDO_ARMADO\n5. Confirmar el partido\n\n**Notificaciones esperadas:**\n- Partido creado → 16 emails\n- Cada jugador que se une → N emails\n- Partido armado → 6 emails\n- Partido confirmado → 6 emails"
+					}
+				},
+				{
+					"name": "🧪 Probar State Pattern: Estados del Partido",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/partidos?page=0&size=50",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "partidos"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "50"
+								}
+							]
+						},
+						"description": "🏗️ **STATE PATTERN - Verificar Estados**\n\n**Estados disponibles en la DB:**\n- NECESITAMOS_JUGADORES: 20 partidos (46.5%)\n- PARTIDO_ARMADO: 12 partidos (27.9%)\n- PARTIDO_CONFIRMADO: 6 partidos (14.0%)\n- EN_JUEGO: 2 partidos (4.7%)\n- PARTIDO_FINALIZADO: 2 partidos (4.7%)\n- PARTIDO_CANCELADO: 1 partido (2.3%)\n\n**Para probar transiciones:**\n1. Tomar un partido en NECESITAMOS_JUGADORES\n2. Agregar jugadores hasta completar cupo\n3. Ver transición automática a PARTIDO_ARMADO\n4. Confirmar → PARTIDO_CONFIRMADO\n5. Finalizar → PARTIDO_FINALIZADO"
+					}
+				},
+				{
+					"name": "🧪 Probar Strategy Pattern: Todas las Estrategias",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/partidos/buscar?usuarioId=43&estrategia=nivel",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "partidos", "buscar"],
+							"query": [
+								{
+									"key": "usuarioId",
+									"value": "43",
+									"description": "Novak Djokovic (Tenis, AVANZADO)"
+								},
+								{
+									"key": "estrategia",
+									"value": "nivel"
+								}
+							]
+						},
+						"description": "🏗️ **STRATEGY PATTERN - Comparar Estrategias**\n\n**Cambiar 'estrategia' por:**\n- `cercania` → Busca por distancia geográfica\n- `nivel` → Busca por compatibilidad de nivel\n- `historial` → Analiza experiencia y historial\n\n**Jugadores de prueba:**\n- Novak Djokovic (ID: 43) - Tenis, AVANZADO\n- Paulo Dybala (ID: 25) - Fútbol, PRINCIPIANTE  \n- LeBron James (ID: 28) - Básquet, AVANZADO\n\n**Resultados esperados:**\n- Cercania: Partidos cerca de su ubicación\n- Nivel: Solo partidos compatibles con AVANZADO\n- Historial: Partidos con jugadores conocidos/similares"
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"description": "URL base de la API Sports Manager"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Script de configuración global",
+					"console.log('🏆 Sports Manager API - Inicializando requests...');"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Validaciones globales",
+					"pm.test('Status code is successful', function () {",
+					"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+					"});",
+					"",
+					"if (pm.response.headers.get('Content-Type') && pm.response.headers.get('Content-Type').includes('application/json')) {",
+					"    pm.test('Response is valid JSON', function () {",
+					"        pm.response.to.have.jsonBody();",
+					"    });",
+					"}"
+				]
+			}
+		}
+	]
+} 

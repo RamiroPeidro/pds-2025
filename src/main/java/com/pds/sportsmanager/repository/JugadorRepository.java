@@ -24,6 +24,18 @@ public interface JugadorRepository extends JpaRepository<Jugador, Long> {
     Optional<Jugador> findByEmail(String email);
     
     /**
+     * Busca un jugador por nombre con jugadorDeportes y deportes cargados
+     */
+    @Query("SELECT j FROM Jugador j LEFT JOIN FETCH j.jugadorDeportes jd LEFT JOIN FETCH jd.deporte WHERE j.nombre = :nombre")
+    Optional<Jugador> findByNombreWithDeportesFavs(@Param("nombre") String nombre);
+    
+    /**
+     * Busca un jugador por email con jugadorDeportes y deportes cargados
+     */
+    @Query("SELECT j FROM Jugador j LEFT JOIN FETCH j.jugadorDeportes jd LEFT JOIN FETCH jd.deporte WHERE j.email = :email")
+    Optional<Jugador> findByEmailWithDeportesFavs(@Param("email") String email);
+    
+    /**
      * Verifica si existe un jugador con el nombre dado
      */
     boolean existsByNombre(String nombre);
@@ -39,10 +51,17 @@ public interface JugadorRepository extends JpaRepository<Jugador, Long> {
     List<Jugador> findByNivelDeJuego(NivelDeJuego nivel);
     
     /**
-     * Busca jugadores por deportes favoritos (usando String deporteFavorito)
+     * Busca jugadores por deportes favoritos (usando tabla intermedia)
+     * Solo jugadores que tienen ese deporte marcado como favorito
+     */
+    @Query("SELECT DISTINCT j FROM Jugador j JOIN j.jugadorDeportes jd WHERE jd.deporte.id = :deporteId AND jd.esFavorito = true")
+    List<Jugador> findByDeporteFavorito(@Param("deporteId") Long deporteId);
+    
+    /**
+     * Busca jugadores por deporte favorito principal (String - fallback)
      */
     @Query("SELECT j FROM Jugador j JOIN Deporte d ON j.deporteFavorito = d.nombre WHERE d.id = :deporteId")
-    List<Jugador> findByDeporteFavorito(@Param("deporteId") Long deporteId);
+    List<Jugador> findByDeporteFavoritoString(@Param("deporteId") Long deporteId);
     
     /**
      * Busca jugadores cercanos a una ubicación específica
@@ -65,4 +84,16 @@ public interface JugadorRepository extends JpaRepository<Jugador, Long> {
      */
     @Query("SELECT DISTINCT j FROM Jugador j WHERE SIZE(j.partidosOrganizados) > 0")
     List<Jugador> findJugadoresActivos();
+    
+    /**
+     * Obtiene todos los jugadores con jugadorDeportes y deportes cargados (fetch join para evitar LazyInitializationException)
+     */
+    @Query("SELECT DISTINCT j FROM Jugador j LEFT JOIN FETCH j.jugadorDeportes jd LEFT JOIN FETCH jd.deporte")
+    List<Jugador> findAllWithDeportesFavs();
+    
+    /**
+     * Busca jugador por ID con jugadorDeportes y deportes cargados
+     */
+    @Query("SELECT j FROM Jugador j LEFT JOIN FETCH j.jugadorDeportes jd LEFT JOIN FETCH jd.deporte WHERE j.id = :id")
+    Optional<Jugador> findByIdWithDeportesFavs(@Param("id") Long id);
 } 

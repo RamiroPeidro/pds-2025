@@ -1,29 +1,26 @@
 package com.pds.sportsmanager.service;
 
 import com.pds.sportsmanager.model.entity.Jugador;
-import com.pds.sportsmanager.model.entity.Ubicacion;
 import com.pds.sportsmanager.model.entity.JugadorDeporte;
 import com.pds.sportsmanager.repository.JugadorRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @Transactional
-public class JugadorService implements UserDetailsService {
+public class JugadorService {
 
     private static final Logger logger = LoggerFactory.getLogger(JugadorService.class);
-    private final UbicacionService ubicacionService;
 
     private final JugadorRepository jugadorRepository;
     private final PasswordEncoder passwordEncoder;
@@ -40,37 +37,25 @@ public class JugadorService implements UserDetailsService {
     }
 
     /**
-     * Para Spring Security: carga usuario por email (username)
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Jugador j = jugadorRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Jugador no encontrado: " + email));
-        return new User(j.getEmail(), j.getContrasenia(), Collections.emptyList());
-    }
-
-    /**
-     * Registra un nuevo jugador: valida, encripta y guarda
+     * Registra un nuevo jugador
      */
     public Jugador registrarJugador(Jugador jugador) {
         logger.info("Registrando nuevo jugador: {}", jugador.getNombre());
-
-        // validaciones de negocio
+        
+        // Validaciones de negocio
         validarJugadorParaRegistro(jugador);
-
-        // persistir primero la ubicación
-        Ubicacion ubicacionInicial = jugador.getUbicacion();
-        Ubicacion ubicacionGuardada = ubicacionService.crearUbicacion(ubicacionInicial);
-        jugador.setUbicacion(ubicacionGuardada);
-
-        // encriptar contraseña
+        
+        // Encriptar contraseña
         jugador.setContrasenia(passwordEncoder.encode(jugador.getContrasenia()));
 
-        // guardar jugador con la ubicación ya persistida
-        Jugador guardado = jugadorRepository.save(jugador);
-        logger.info("Jugador registrado exitosamente con ID: {}", guardado.getId());
-        return guardado;
+        // Guardar jugador
+        Jugador jugadorGuardado = jugadorRepository.save(jugador);
+
+        // Registrar deportes asociados
+
+        
+        logger.info("Jugador registrado exitosamente con ID: {}", jugadorGuardado.getId());
+        return jugadorGuardado;
     }
 
     /**
@@ -78,33 +63,44 @@ public class JugadorService implements UserDetailsService {
      */
     public Jugador actualizarJugador(Long id, Jugador jugadorActualizado) {
         logger.info("Actualizando jugador con ID: {}", id);
-        Jugador existente = obtenerJugadorPorId(id);
-
-        if (jugadorActualizado.getNombre() != null && !jugadorActualizado.getNombre().equals(existente.getNombre())) {
+        
+        Jugador jugadorExistente = obtenerJugadorPorId(id);
+        
+        // Actualizar campos permitidos
+        if (jugadorActualizado.getNombre() != null &&
+            !jugadorActualizado.getNombre().equals(jugadorExistente.getNombre())) {
+            
             if (jugadorRepository.existsByNombre(jugadorActualizado.getNombre())) {
                 throw new IllegalArgumentException("El nombre de jugador ya está en uso");
             }
-            existente.setNombre(jugadorActualizado.getNombre());
+            jugadorExistente.setNombre(jugadorActualizado.getNombre());
         }
-        if (jugadorActualizado.getEmail() != null && !jugadorActualizado.getEmail().equals(existente.getEmail())) {
+        
+        if (jugadorActualizado.getEmail() != null &&
+            !jugadorActualizado.getEmail().equals(jugadorExistente.getEmail())) {
+            
             if (jugadorRepository.existsByEmail(jugadorActualizado.getEmail())) {
                 throw new IllegalArgumentException("El email ya está en uso");
             }
-            existente.setEmail(jugadorActualizado.getEmail());
+            jugadorExistente.setEmail(jugadorActualizado.getEmail());
         }
+        
         if (jugadorActualizado.getNivelDeJuego() != null) {
-            existente.setNivelDeJuego(jugadorActualizado.getNivelDeJuego());
+            jugadorExistente.setNivelDeJuego(jugadorActualizado.getNivelDeJuego());
         }
+        
         if (jugadorActualizado.getDeporteFavorito() != null) {
-            existente.setDeporteFavorito(jugadorActualizado.getDeporteFavorito());
+            jugadorExistente.setDeporteFavorito(jugadorActualizado.getDeporteFavorito());
         }
+        
         if (jugadorActualizado.getUbicacion() != null) {
-            existente.setUbicacion(jugadorActualizado.getUbicacion());
+            jugadorExistente.setUbicacion(jugadorActualizado.getUbicacion());
         }
-
-        Jugador actualizado = jugadorRepository.save(existente);
+        
+        Jugador jugadorGuardado = jugadorRepository.save(jugadorExistente);
         logger.info("Jugador actualizado exitosamente");
-        return actualizado;
+        
+        return jugadorGuardado;
     }
 
     /**
@@ -112,43 +108,45 @@ public class JugadorService implements UserDetailsService {
      */
     public void actualizarContrasenia(Long id, String nuevaContrasenia) {
         logger.info("Actualizando contraseña para jugador ID: {}", id);
+        
         Jugador jugador = obtenerJugadorPorId(id);
         jugador.setContrasenia(passwordEncoder.encode(nuevaContrasenia));
         jugadorRepository.save(jugador);
+        
         logger.info("Contraseña actualizada exitosamente");
     }
 
     /**
-     * Busca un jugador por nombre
+     * Busca un jugador por nombre con deportes favoritos cargados
      */
     @Transactional(readOnly = true)
     public Optional<Jugador> buscarPorNombre(String nombre) {
-        return jugadorRepository.findByNombre(nombre);
+        return jugadorRepository.findByNombreWithDeportesFavs(nombre);
     }
 
     /**
-     * Busca un jugador por email
+     * Busca un jugador por email con deportes favoritos cargados
      */
     @Transactional(readOnly = true)
     public Optional<Jugador> buscarPorEmail(String email) {
-        return jugadorRepository.findByEmail(email);
+        return jugadorRepository.findByEmailWithDeportesFavs(email);
     }
 
     /**
-     * Obtiene un jugador por ID
+     * Obtiene un jugador por ID con sus deportes favoritos cargados
      */
     @Transactional(readOnly = true)
     public Jugador obtenerJugadorPorId(Long id) {
-        return jugadorRepository.findById(id)
+        return jugadorRepository.findByIdWithDeportesFavs(id)
                 .orElseThrow(() -> new RuntimeException("Jugador no encontrado con ID: " + id));
     }
 
     /**
-     * Obtiene todos los jugadores
+     * Obtiene todos los jugadores con sus deportes favoritos cargados
      */
     @Transactional(readOnly = true)
     public List<Jugador> obtenerTodosLosJugadores() {
-        return jugadorRepository.findAll();
+        return jugadorRepository.findAllWithDeportesFavs();
     }
 
     /**
@@ -168,19 +166,26 @@ public class JugadorService implements UserDetailsService {
     }
 
     /**
-     * Elimina un jugador verificando que no tenga partidos activos
+     * Elimina un jugador
      */
     public void eliminarJugador(Long id) {
         logger.info("Eliminando jugador con ID: {}", id);
-        Jugador j = obtenerJugadorPorId(id);
-        long activos = j.getPartidos().stream()
-                .filter(p -> !p.getEstadoNombre().equals("PARTIDO_FINALIZADO")
-                        && !p.getEstadoNombre().equals("PARTIDO_CANCELADO"))
-                .count();
-        if (activos > 0) {
+        
+        Jugador jugador = obtenerJugadorPorId(id);
+        
+        // Verificar que no tenga partidos activos
+        long partidosActivos = jugadorRepository.findById(id)
+                .map(j -> j.getPartidos().stream()
+                        .filter(p -> !p.getEstadoNombre().equals("PARTIDO_FINALIZADO") &&
+                                !p.getEstadoNombre().equals("PARTIDO_CANCELADO"))
+                        .count())
+                .orElse(0L);
+
+        if (partidosActivos > 0) {
             throw new IllegalStateException("No se puede eliminar un jugador con partidos activos");
         }
-        jugadorRepository.delete(j);
+        
+        jugadorRepository.delete(jugador);
         logger.info("Jugador eliminado exitosamente");
     }
 
@@ -189,13 +194,17 @@ public class JugadorService implements UserDetailsService {
      */
     @Transactional(readOnly = true)
     public boolean validarContrasenia(String nombre, String contrasenia) {
-        return buscarPorNombre(nombre)
-                .map(j -> passwordEncoder.matches(contrasenia, j.getContrasenia()))
-                .orElse(false);
+        Optional<Jugador> jugador = buscarPorNombre(nombre);
+        
+        if (jugador.isPresent()) {
+            return passwordEncoder.matches(contrasenia, jugador.get().getContrasenia());
+        }
+        
+        return false;
     }
 
     /**
-     * Verifica si un nombre está disponible
+     * Verifica si un nombre de jugador está disponible
      */
     @Transactional(readOnly = true)
     public boolean esNombreJugadorDisponible(String nombre) {
@@ -211,25 +220,43 @@ public class JugadorService implements UserDetailsService {
     }
 
     /**
-     * Validaciones de negocio para registro
+     * Validaciones de negocio para el registro de jugador
      */
     private void validarJugadorParaRegistro(Jugador jugador) {
         if (jugadorRepository.existsByNombre(jugador.getNombre())) {
             throw new IllegalArgumentException("El nombre de jugador ya está en uso");
         }
+        
         if (jugadorRepository.existsByEmail(jugador.getEmail())) {
             throw new IllegalArgumentException("El email ya está registrado");
         }
+        
         if (jugador.getContrasenia() == null || jugador.getContrasenia().length() < 6) {
             throw new IllegalArgumentException("La contraseña debe tener al menos 6 caracteres");
         }
     }
 
+    /**
+     * Busca jugadores por deporte favorito (múltiples deportes + fallback)
+     * Combina tabla intermedia + campo String para máxima cobertura
+     */
     public List<Jugador> buscarJugadoresPorDeporte(Long deporteId) {
-        logger.info("Buscando jugadores por deporte: {}", deporteId);
-        List<Jugador> jug = jugadorRepository.findByDeporteFavorito(deporteId);
-        logger.info("Jugadores encontrados: {}", jug);
-        return jug;
+        logger.info("Buscando jugadores por deporte ID: {}", deporteId);
+        
+        // 1. Buscar en tabla intermedia (múltiples deportes)
+        List<Jugador> jugadoresMultiples = jugadorRepository.findByDeporteFavorito(deporteId);
+        
+        // 2. Buscar en campo String (fallback para jugadores sin tabla intermedia)
+        List<Jugador> jugadoresString = jugadorRepository.findByDeporteFavoritoString(deporteId);
+        
+        // 3. Combinar y eliminar duplicados usando Set
+        Set<Jugador> jugadoresUnicos = new HashSet<>(jugadoresMultiples);
+        jugadoresUnicos.addAll(jugadoresString);
+        
+        List<Jugador> resultado = new ArrayList<>(jugadoresUnicos);
+        logger.info("Encontrados {} jugadores para deporte ID {}: {} con múltiples deportes, {} por String", 
+                   resultado.size(), deporteId, jugadoresMultiples.size(), jugadoresString.size());
+        
+        return resultado;
     }
 } 
-
