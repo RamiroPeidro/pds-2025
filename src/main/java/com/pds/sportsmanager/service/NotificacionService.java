@@ -252,6 +252,8 @@ public class NotificacionService {
                 evento.timestamp()
             );
 
+            log.info("Notificando a: {}", eventoIndividual);
+
             for (Notificador notificador : notificadores) {
                 if (notificador.estaHabilitado(pref)) {
                     try {

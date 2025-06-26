@@ -25,4 +25,13 @@ public record EventSingle(
     public String getDestinatario() {
         return destinatario;
     }
+    public String getMensaje() {
+        return mensaje;
+    }
+    public Long getPartidoId() {
+        return partidoId;
+    }
+    public TipoNotificacion getTipo() {
+        return tipo;
+    }
 }

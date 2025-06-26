@@ -1,6 +1,7 @@
 package com.pds.sportsmanager.service;
 
 import com.pds.sportsmanager.model.dto.PreferenciaDTO;
+import com.pds.sportsmanager.model.entity.Jugador;
 import com.pds.sportsmanager.model.entity.PreferenciaNotificacion;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -11,5 +12,5 @@ public interface PreferenciaNotificacionService {
 
     Optional<PreferenciaNotificacion> obtenerPorEmail(String email);
 
-    void guardar(PreferenciaDTO preferenciaNotificacion, Long usuarioId);
+    void guardar(PreferenciaDTO preferenciaNotificacion, Jugador jugador);
 }

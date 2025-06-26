@@ -31,8 +31,9 @@ public class NotificadorEmail implements Notificador {
 
         CompletableFuture.runAsync(() -> {
             try {
+                System.out.println("Enviando email de forma asíncrona para el evento: " + evento.tipo());
                 enviarEmailsAsincrono(evento);
-                log.info("📧 EMAIL ENVIADO - Tipo: {} | Destinatario: {}", evento.tipo(), evento.destinatario());
+                log.info("EMAIL ENVIADO - Tipo: {} | Destinatario: {}", evento.tipo(), evento.destinatario());
             } catch (Exception e) {
                 log.error("Error enviando emails para evento {}: {}", evento.tipo(), e.getMessage());
             }
@@ -61,6 +62,7 @@ public class NotificadorEmail implements Notificador {
         String cuerpoHtml = generarCuerpoHtml(evento);
 
             try {
+                System.out.println("Enviando email a: " + evento.getDestinatario());
                 enviarEmailIndividual(evento.getDestinatario(), asunto, cuerpoHtml);
             } catch (Exception e) {
                 log.error("Error enviando email a {}: {}", evento.getDestinatario(), e.getMessage());
@@ -88,7 +90,7 @@ public class NotificadorEmail implements Notificador {
      */
     private String generarCuerpoHtml(EventSingle evento) {
         String timestamp = evento.timestamp().format(FORMATTER);
-        
+
         return """
                 <!DOCTYPE html>
                 <html>
@@ -97,7 +99,7 @@ public class NotificadorEmail implements Notificador {
                     <style>
                         body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5; }
                         .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-                        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; }
+                        .header { background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); color: white; padding: 20px; text-align: center; }
                         .content { padding: 30px; }
                         .footer { background: #f8f9fa; padding: 15px; text-align: center; font-size: 12px; color: #666; }
                         .btn { display: inline-block; background: #28a745; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 10px 0; }
@@ -120,23 +122,25 @@ public class NotificadorEmail implements Notificador {
                 </body>
                 </html>
                 """.formatted(
-                    generarAsunto(evento),
-                    evento.mensaje(),
-                    evento.partidoId() != null ? 
+                generarAsunto(evento),
+                evento.mensaje(),
+                evento.partidoId() != null ?
                         "<a href=\"#\" class=\"btn\">Ver Partido #" + evento.partidoId() + "</a>" : "",
-                    timestamp
-                );
+                timestamp
+        );
     }
+
 
     /**
      * Simula el envío de email individual
      */
     private void enviarEmailIndividual(String destinatario, String asunto, String cuerpoHtml) {
         try {
+            log.info("Enviando email a: {} | Asunto: {}", destinatario, asunto);
             emailAdapter.enviarNotificacion(destinatario, asunto, cuerpoHtml);
             log.info("📧 EMAIL ENVIADO - Para: {} | Asunto: {}", destinatario, asunto);
         } catch (Exception e) {
             log.error("Error al enviar email: {}", e.getMessage());
         }
     }
-} 
+}

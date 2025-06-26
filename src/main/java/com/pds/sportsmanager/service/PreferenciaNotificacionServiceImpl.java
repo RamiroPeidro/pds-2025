@@ -15,7 +15,7 @@ import java.util.Optional;
 public class PreferenciaNotificacionServiceImpl implements PreferenciaNotificacionService {
 
     private final PreferenciaNotificacionRepository repository;
-    private final JugadorService jugadorService;
+//    private final JugadorService jugadorService;
 
     @Override
     public Optional<PreferenciaNotificacion> obtenerPorUsuarioId(Long usuarioId) {
@@ -28,9 +28,8 @@ public class PreferenciaNotificacionServiceImpl implements PreferenciaNotificaci
     }
 
     @Override
-    public void guardar(PreferenciaDTO preferenciaNotificacion, Long usuarioId) {
+    public void guardar(PreferenciaDTO preferenciaNotificacion, Jugador jugador) {
         PreferenciaNotificacion preferencia = new PreferenciaNotificacion();
-        Jugador jugador = jugadorService.obtenerJugadorPorId(usuarioId);
         preferencia.setJugador(jugador);
         preferencia.setPush(preferenciaNotificacion.firebaseNotificaciones());
         preferencia.setEmail(preferenciaNotificacion.emailNotificaciones());
