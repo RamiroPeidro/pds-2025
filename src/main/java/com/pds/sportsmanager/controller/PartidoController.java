@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -101,8 +102,12 @@ public class PartidoController {
         log.info("REST: Creando nuevo partido");
         
         try {
-            Partido partido = partidoService.crearPartidoFromDTO(partidoDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(partido));
+            Optional<Partido> partidoOpt = partidoService.crearPartidoFromDTO(partidoDTO);
+            if (partidoOpt.isEmpty()) {
+                log.warn("No se pudo crear el partido: entidades relacionadas no encontradas");
+                return ResponseEntity.badRequest().build();
+            }
+            return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(partidoOpt.get()));
         } catch (IllegalArgumentException e) {
             log.warn("Error de validación al crear partido: {}", e.getMessage());
             return ResponseEntity.badRequest().build();
@@ -208,12 +213,11 @@ public class PartidoController {
     public ResponseEntity<PartidoOutputDTO> obtenerPartido(@PathVariable Long id) {
         log.info("REST: Obteniendo partido {}", id);
         
-        try {
-            Partido partido = partidoService.obtenerPartidoPorId(id);
-            return ResponseEntity.ok(toDTO(partido));
-        } catch (RuntimeException e) {
+        Optional<Partido> partidoOpt = partidoService.obtenerPartidoPorId(id);
+        if (partidoOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.ok(toDTO(partidoOpt.get()));
     }
 
     @GetMapping

@@ -6,6 +6,7 @@ import com.pds.sportsmanager.model.entity.Deporte;
 import com.pds.sportsmanager.model.entity.Jugador;
 import com.pds.sportsmanager.model.entity.Partido;
 import com.pds.sportsmanager.model.entity.Ubicacion;
+import com.pds.sportsmanager.patterns.state.NecesitamosJugadores;
 import com.pds.sportsmanager.patterns.strategy.EstrategiaEmparejamiento;
 import com.pds.sportsmanager.repository.PartidoRepository;
 import org.slf4j.Logger;
@@ -15,7 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,35 +48,65 @@ public class PartidoService {
 
     /**
      * Crea un nuevo partido desde DTO
+     * Retorna Optional.empty() si alguna entidad relacionada no existe
      */
-    public Partido crearPartidoFromDTO(PartidoInputDTO partidoDTO) {
+    public Optional<Partido> crearPartidoFromDTO(PartidoInputDTO partidoDTO) {
         logger.info("Creando nuevo partido desde DTO: {}", partidoDTO.titulo());
         
-        // Obtener entidades relacionadas
-        Ubicacion ubicacion = ubicacionService.obtenerUbicacionPorId(partidoDTO.ubicacionId()).orElseThrow(
-            () -> new RuntimeException("Ubicación no encontrada con ID: " + partidoDTO.ubicacionId())
-        );
-        Deporte deporte = deporteService.obtenerDeportePorId(partidoDTO.deporteId()).orElseThrow(
-            () -> new RuntimeException("Deporte no encontrado con ID: " + partidoDTO.deporteId())
-        );
-        Jugador owner = usuarioService.obtenerUsuarioPorId(partidoDTO.ownerId());
+        // Obtener entidades relacionadas - si alguna no existe, retornar empty
+        Optional<Ubicacion> ubicacionOpt = ubicacionService.obtenerUbicacionPorId(partidoDTO.ubicacionId());
+        if (ubicacionOpt.isEmpty()) {
+            logger.warn("Ubicación no encontrada con ID: {}", partidoDTO.ubicacionId());
+            return Optional.empty();
+        }
         
-        // Crear el partido
-        Partido partido = new Partido(
-            partidoDTO.titulo(),
-            partidoDTO.fechaHora(),
-            partidoDTO.duracionMinutos(),
-            partidoDTO.cantidadJugadoresRequeridos(),
-            ubicacion,
-            deporte,
-            owner
-        );
+        Optional<Deporte> deporteOpt = deporteService.obtenerDeportePorId(partidoDTO.deporteId());
+        if (deporteOpt.isEmpty()) {
+            logger.warn("Deporte no encontrado con ID: {}", partidoDTO.deporteId());
+            return Optional.empty();
+        }
         
-        partido.setDescripcion(partidoDTO.descripcion());
-        partido.setNivelMinimo(partidoDTO.nivelMinimo());
-        partido.setNivelMaximo(partidoDTO.nivelMaximo());
+        Jugador owner;
+        try {
+            owner = usuarioService.obtenerUsuarioPorId(partidoDTO.ownerId());
+            if (owner == null) {
+                logger.warn("Jugador no encontrado con ID: {}", partidoDTO.ownerId());
+                return Optional.empty();
+            }
+        } catch (RuntimeException e) {
+            logger.warn("Jugador no encontrado con ID: {}", partidoDTO.ownerId());
+            return Optional.empty();
+        }
         
-        return crearPartido(partido);
+        Ubicacion ubicacion = ubicacionOpt.get();
+        Deporte deporte = deporteOpt.get();
+        
+        // Crear lista de jugadores con el owner
+        List<Jugador> jugadores = new ArrayList<>();
+        jugadores.add(owner);
+        
+        // Crear el partido usando builder
+        Partido partido = Partido.builder()
+            .titulo(partidoDTO.titulo())
+            .descripcion(partidoDTO.descripcion())
+            .fechaHora(partidoDTO.fechaHora())
+            .duracionMinutos(partidoDTO.duracionMinutos())
+            .cantidadJugadoresRequeridos(partidoDTO.cantidadJugadoresRequeridos())
+            .nivelMinimo(partidoDTO.nivelMinimo())
+            .nivelMaximo(partidoDTO.nivelMaximo())
+            .ubicacion(ubicacion)
+            .deporte(deporte)
+            .owner(owner)
+            .jugadores(jugadores)
+            .estado(new NecesitamosJugadores())
+            .estadoNombre("NECESITAMOS_JUGADORES")
+            .estadisticas(new ArrayList<>())
+            .comentarios(new ArrayList<>())
+            .createdAt(LocalDateTime.now())
+            .updatedAt(LocalDateTime.now())
+            .build();
+        
+        return Optional.of(crearPartido(partido));
     }
 
     /**
@@ -101,7 +134,7 @@ public class PartidoService {
     public void agregarJugadorAlPartido(Long partidoId, Long jugadorId) {
         logger.info("Agregando jugador {} al partido {}", jugadorId, partidoId);
         
-        Partido partido = obtenerPartidoPorId(partidoId);
+        Partido partido = obtenerPartidoPorIdInterno(partidoId);
         Jugador jugador = usuarioService.obtenerUsuarioPorId(jugadorId);
         
         // Usar el patrón State para agregar el jugador
@@ -124,7 +157,7 @@ public class PartidoService {
     public void confirmarPartido(Long partidoId) {
         logger.info("Confirmando partido {}", partidoId);
         
-        Partido partido = obtenerPartidoPorId(partidoId);
+        Partido partido = obtenerPartidoPorIdInterno(partidoId);
         partido.confirmarPartido();
         
         partidoRepository.save(partido);
@@ -139,7 +172,7 @@ public class PartidoService {
     public void cancelarPartido(Long partidoId) {
         logger.info("Cancelando partido {}", partidoId);
         
-        Partido partido = obtenerPartidoPorId(partidoId);
+        Partido partido = obtenerPartidoPorIdInterno(partidoId);
         partido.cancelarPartido();
         
         partidoRepository.save(partido);
@@ -154,7 +187,7 @@ public class PartidoService {
     public void finalizarPartido(Long partidoId) {
         logger.info("Finalizando partido {}", partidoId);
         
-        Partido partido = obtenerPartidoPorId(partidoId);
+        Partido partido = obtenerPartidoPorIdInterno(partidoId);
         partido.finalizarPartido();
         
         partidoRepository.save(partido);
@@ -235,10 +268,19 @@ public class PartidoService {
      * Obtiene un partido por ID
      */
     @Transactional(readOnly = true)
-    public Partido obtenerPartidoPorId(Long id) {
+    public Optional<Partido> obtenerPartidoPorId(Long id) {
+        Partido partido = partidoRepository.findByIdWithRelations(id);
+        return Optional.ofNullable(partido);
+    }
+    
+    /**
+     * Obtiene un partido por ID (para uso interno donde sabemos que existe)
+     */
+    @Transactional(readOnly = true)
+    public Partido obtenerPartidoPorIdInterno(Long id) {
         Partido partido = partidoRepository.findByIdWithRelations(id);
         if (partido == null) {
-            throw new RuntimeException("Partido no encontrado con ID: " + id);
+            throw new IllegalStateException("Partido no encontrado con ID: " + id);
         }
         return partido;
     }
