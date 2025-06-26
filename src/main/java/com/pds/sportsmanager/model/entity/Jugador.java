@@ -65,14 +65,15 @@ public class Jugador {
     @ToString.Exclude
     private List<Deporte> deportesFavs = new ArrayList<>(); // Cambiado de deporteFavorito a lista
 
-    @Embedded
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ubicacion_id")
     private Ubicacion ubicacion;
 
-    @OneToMany(mappedBy = "organizador", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
     @ToString.Exclude
     private List<Partido> partidosOrganizados = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "participantes", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "jugadores", fetch = FetchType.LAZY)
     @ToString.Exclude
     private List<Partido> partidos = new ArrayList<>();
 
@@ -85,7 +86,7 @@ public class Jugador {
     // Agrega un nuevo partido organizado por este jugador
     public void crearPartido(Partido partido) {
         partidosOrganizados.add(partido);
-        partido.setOrganizador(this);
+        partido.setOwner(this);
     }
 
     // Busca partidos disponibles a los que no esté unido y que no haya organizado
@@ -99,7 +100,7 @@ public class Jugador {
     public void aceptarPartido(Partido partido) {
         if (!partidos.contains(partido)) {
             partidos.add(partido);
-            partido.getParticipantes().add(this);
+            partido.getJugadores().add(this);
         }
     }
 
@@ -107,7 +108,7 @@ public class Jugador {
     public void cancelarPartido(Partido partido) {
         if (partidos.contains(partido)) {
             partidos.remove(partido);
-            partido.getParticipantes().remove(this);
+            partido.getJugadores().remove(this);
         }
     }
 

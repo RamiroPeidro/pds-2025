@@ -197,19 +197,4 @@ public class Partido {
 
         return nivelMaximo == null || nivel.ordinal() <= nivelMaximo.ordinal();
     }
-    private Jugador organizador;
-
-    @ManyToMany
-    @JoinTable(name = "partido_jugador")
-    private List<Jugador> participantes = new ArrayList<>();
-
-    public void setOrganizador(Jugador jugador) {
-        this.organizador = jugador;
-    }
-
-    public List<Jugador> getParticipantes() {
-        return participantes;
-    }
-
-
 }

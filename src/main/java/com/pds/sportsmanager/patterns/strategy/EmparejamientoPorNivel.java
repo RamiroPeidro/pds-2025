@@ -30,7 +30,11 @@ public class EmparejamientoPorNivel implements EstrategiaEmparejamiento {
         }
 
         public static CriteriosPuntuacionNivel defaultConfig() {
-            return CriteriosPuntuacionNivel.builder().build();
+            return CriteriosPuntuacionNivel.builder()
+                .compatibilidad(PuntuacionCompatibilidadNivel.defaultConfig())
+                .distancia(PuntuacionDistancia.defaultConfig())
+                .deporteFavorito(10.0)
+                .build();
         }
     }
 
@@ -52,7 +56,13 @@ public class EmparejamientoPorNivel implements EstrategiaEmparejamiento {
         }
 
         public static PuntuacionCompatibilidadNivel defaultConfig() {
-            return PuntuacionCompatibilidadNivel.builder().build();
+            return PuntuacionCompatibilidadNivel.builder()
+                .nivelPerfecto(100.0)
+                .penalizacionPorDistancia(20.0)
+                .nivelAbierto(50.0)
+                .soloMinimo(70.0)
+                .soloMaximo(70.0)
+                .build();
         }
 
         public double calcularPuntuacion(Jugador jugador, PartidoBusquedaResult partido) {
@@ -110,7 +120,6 @@ public class EmparejamientoPorNivel implements EstrategiaEmparejamiento {
         }
     }
 
-    @Builder
     public record PuntuacionDistancia(
             double muyerca,
             double media,
@@ -123,7 +132,7 @@ public class EmparejamientoPorNivel implements EstrategiaEmparejamiento {
         }
 
         public static PuntuacionDistancia defaultConfig() {
-            return PuntuacionDistancia.builder().build();
+            return new PuntuacionDistancia(5.0, 0.0, -10.0);
         }
 
         public double calcularPuntuacion(Double distanciaKm) {

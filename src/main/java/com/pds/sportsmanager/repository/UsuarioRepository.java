@@ -14,9 +14,9 @@ import java.util.Optional;
 public interface UsuarioRepository extends JpaRepository<Jugador, Long> {
     
     /**
-     * Busca un jugador por nombre de jugador
+     * Busca un jugador por nombre
      */
-    Optional<Jugador> findByNombreUsuario(String nombreUsuario);
+    Optional<Jugador> findByNombre(String nombre);
     
     /**
      * Busca un jugador por email
@@ -24,9 +24,9 @@ public interface UsuarioRepository extends JpaRepository<Jugador, Long> {
     Optional<Jugador> findByEmail(String email);
     
     /**
-     * Verifica si existe un jugador con el nombre de jugador dado
+     * Verifica si existe un jugador con el nombre dado
      */
-    boolean existsByNombreUsuario(String nombreUsuario);
+    boolean existsByNombre(String nombre);
     
     /**
      * Verifica si existe un jugador con el email dado
@@ -34,14 +34,14 @@ public interface UsuarioRepository extends JpaRepository<Jugador, Long> {
     boolean existsByEmail(String email);
     
     /**
-     * Busca usuarios por nivel de jugador
+     * Busca usuarios por nivel de juego
      */
-    List<Jugador> findByNivelDeJugador(NivelDeJuego nivel);
+    List<Jugador> findByNivelDeJuego(NivelDeJuego nivel);
     
     /**
-     * Busca usuarios por deporte favorito
+     * Busca usuarios por deportes favoritos
      */
-    @Query("SELECT u FROM Jugador u WHERE u.deporteFavorito.id = :deporteId")
+    @Query("SELECT u FROM Jugador u JOIN u.deportesFavs d WHERE d.id = :deporteId")
     List<Jugador> findByDeporteFavorito(@Param("deporteId") Long deporteId);
     
     /**
@@ -63,6 +63,6 @@ public interface UsuarioRepository extends JpaRepository<Jugador, Long> {
     /**
      * Busca usuarios activos (que han creado al menos un partido)
      */
-    @Query("SELECT DISTINCT u FROM Jugador u WHERE SIZE(u.partidosCreados) > 0")
+    @Query("SELECT DISTINCT u FROM Jugador u WHERE SIZE(u.partidosOrganizados) > 0")
     List<Jugador> findUsuariosActivos();
 } 

@@ -58,7 +58,7 @@ public class UsuarioService {
         if (jugadorActualizado.getNombre() != null &&
             !jugadorActualizado.getNombre().equals(jugadorExistente.getNombre())) {
             
-            if (usuarioRepository.existsByNombreUsuario(jugadorActualizado.getNombre())) {
+            if (usuarioRepository.existsByNombre(jugadorActualizado.getNombre())) {
                 throw new IllegalArgumentException("El nombre de usuario ya está en uso");
             }
             jugadorExistente.setNombre(jugadorActualizado.getNombre());
@@ -105,11 +105,11 @@ public class UsuarioService {
     }
 
     /**
-     * Busca un usuario por nombre de usuario
+     * Busca un usuario por nombre
      */
     @Transactional(readOnly = true)
-    public Optional<Jugador> buscarPorNombreUsuario(String nombreUsuario) {
-        return usuarioRepository.findByNombreUsuario(nombreUsuario);
+    public Optional<Jugador> buscarPorNombre(String nombre) {
+        return usuarioRepository.findByNombre(nombre);
     }
 
     /**
@@ -181,8 +181,8 @@ public class UsuarioService {
      * Valida la contraseña de un usuario
      */
     @Transactional(readOnly = true)
-    public boolean validarContrasenia(String nombreUsuario, String contrasenia) {
-        Optional<Jugador> usuario = buscarPorNombreUsuario(nombreUsuario);
+    public boolean validarContrasenia(String nombre, String contrasenia) {
+        Optional<Jugador> usuario = buscarPorNombre(nombre);
         
         if (usuario.isPresent()) {
             return passwordEncoder.matches(contrasenia, usuario.get().getContrasenia());
@@ -195,8 +195,8 @@ public class UsuarioService {
      * Verifica si un nombre de usuario está disponible
      */
     @Transactional(readOnly = true)
-    public boolean esNombreUsuarioDisponible(String nombreUsuario) {
-        return !usuarioRepository.existsByNombreUsuario(nombreUsuario);
+    public boolean esNombreUsuarioDisponible(String nombre) {
+        return !usuarioRepository.existsByNombre(nombre);
     }
 
     /**
@@ -211,7 +211,7 @@ public class UsuarioService {
      * Validaciones de negocio para el registro de usuario
      */
     private void validarUsuarioParaRegistro(Jugador jugador) {
-        if (usuarioRepository.existsByNombreUsuario(jugador.getNombre())) {
+        if (usuarioRepository.existsByNombre(jugador.getNombre())) {
             throw new IllegalArgumentException("El nombre de usuario ya está en uso");
         }
         
