@@ -1,6 +1,7 @@
 package com.pds.sportsmanager.service;
 
 import com.pds.sportsmanager.model.entity.Jugador;
+import com.pds.sportsmanager.model.entity.JugadorDeporte;
 import com.pds.sportsmanager.repository.JugadorRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,11 +21,16 @@ public class JugadorService {
 
     private final JugadorRepository jugadorRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JugadorDeporteService jugadorDeporteService;
+    private final PreferenciaNotificacionService preferenciaNotificacionService;
+
 
     @Autowired
-    public JugadorService(JugadorRepository jugadorRepository, PasswordEncoder passwordEncoder) {
+    public JugadorService(JugadorRepository jugadorRepository, PasswordEncoder passwordEncoder, JugadorDeporteService jugadorDeporteService, PreferenciaNotificacionService preferenciaNotificacionService) {
         this.jugadorRepository = jugadorRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jugadorDeporteService = jugadorDeporteService;
+        this.preferenciaNotificacionService = preferenciaNotificacionService;
     }
 
     /**
@@ -38,9 +44,12 @@ public class JugadorService {
         
         // Encriptar contraseña
         jugador.setContrasenia(passwordEncoder.encode(jugador.getContrasenia()));
-        
+
         // Guardar jugador
         Jugador jugadorGuardado = jugadorRepository.save(jugador);
+
+        // Registrar deportes asociados
+
         
         logger.info("Jugador registrado exitosamente con ID: {}", jugadorGuardado.getId());
         return jugadorGuardado;
@@ -222,5 +231,12 @@ public class JugadorService {
         if (jugador.getContrasenia() == null || jugador.getContrasenia().length() < 6) {
             throw new IllegalArgumentException("La contraseña debe tener al menos 6 caracteres");
         }
+    }
+
+    public List<Jugador> buscarJugadoresPorDeporte(Long deporteId) {
+        logger.info("Buscando jugadores por deporte: {}", deporteId);
+        List<Jugador> jug = jugadorRepository.findByDeporteFavorito(deporteId);
+        logger.info("Jugadores encontrados: {}", jug);
+        return jug;
     }
 } 

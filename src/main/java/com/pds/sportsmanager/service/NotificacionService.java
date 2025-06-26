@@ -1,9 +1,13 @@
 package com.pds.sportsmanager.service;
 
+import com.pds.sportsmanager.model.entity.Jugador;
 import com.pds.sportsmanager.model.entity.Partido;
+import com.pds.sportsmanager.model.entity.PreferenciaNotificacion;
 import com.pds.sportsmanager.model.enums.TipoNotificacion;
+import com.pds.sportsmanager.patterns.observer.EventSingle;
 import com.pds.sportsmanager.patterns.observer.NotificacionEvent;
 import com.pds.sportsmanager.patterns.observer.Notificador;
+import com.pds.sportsmanager.patterns.observer.NotificadorFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +24,19 @@ import java.util.stream.Collectors;
 public class NotificacionService {
 
     private final List<Notificador> notificadores = new ArrayList<>();
+    private final NotificadorFactory notificadorFactory;
+    private final JugadorService jugadorService;
+    /**
+     * Constructor por defecto
+     */
+    private final PreferenciaNotificacionServiceImpl preferenciasService;
+
+    public NotificacionService(PreferenciaNotificacionServiceImpl preferenciasService, NotificadorFactory notificadorFactory, JugadorService jugadorService) {
+        this.preferenciasService = preferenciasService;
+        this.notificadorFactory = notificadorFactory;
+        this.jugadorService = jugadorService;
+    }
+
 
     /**
      * Agrega un notificador (Observer)
@@ -44,6 +61,12 @@ public class NotificacionService {
         log.info("Notificando creación del partido: {}", partido.getId());
         
         List<String> destinatarios = obtenerDestinatariosParaDeporte(partido);
+
+        if (destinatarios.isEmpty()) {
+            log.warn("No hay destinatarios para el partido: {}", partido.getId());
+            return;
+        }
+
         String mensaje = String.format(
             "¡Nuevo partido de %s! '%s' - %s. Faltan %d jugadores.",
             partido.getDeporte().getNombre(),
@@ -60,6 +83,7 @@ public class NotificacionService {
         );
         
         notificarTodos(evento);
+        log.info("Notificación de partido creado enviada a: {}", destinatarios);
     }
 
     /**
@@ -213,12 +237,31 @@ public class NotificacionService {
      * Notifica a todos los observadores registrados
      */
     private void notificarTodos(NotificacionEvent evento) {
-        for (Notificador notificador : notificadores) {
-            try {
-                notificador.notificar(evento);
-            } catch (Exception e) {
-                log.error("Error al enviar notificación con {}: {}", 
-                           notificador.getClass().getSimpleName(), e.getMessage());
+        for (String email : evento.getDestinatarios()) {
+            log.info("Notificando a: {}", email);
+
+            PreferenciaNotificacion pref = preferenciasService.obtenerPorEmail(email)
+                    .orElse(PreferenciaNotificacion.porDefecto());
+
+            // Crea un evento solo para ese destinatario
+            EventSingle eventoIndividual = new EventSingle(
+                evento.tipo(),
+                evento.mensaje(),
+                email,
+                evento.partidoId(),
+                evento.timestamp()
+            );
+
+            log.info("Notificando a: {}", eventoIndividual);
+
+            for (Notificador notificador : notificadores) {
+                if (notificador.estaHabilitado(pref)) {
+                    try {
+                        notificador.notificar(eventoIndividual);
+                    } catch (Exception e) {
+                        log.error("Error al notificar a {} por {}: {}", email, notificador.getClass().getSimpleName(), e.getMessage());
+                    }
+                }
             }
         }
     }
@@ -228,7 +271,7 @@ public class NotificacionService {
      */
     private List<String> obtenerEmailsJugadores(Partido partido) {
         return partido.getJugadores().stream()
-                .map(jugador -> jugador.getEmail())
+                .map(Jugador::getEmail)
                 .collect(Collectors.toList());
     }
 
@@ -237,9 +280,11 @@ public class NotificacionService {
      * Esto podría conectarse con un servicio de preferencias de usuario
      */
     private List<String> obtenerDestinatariosParaDeporte(Partido partido) {
-        // Por ahora, retorna lista vacía
-        // En una implementación real, buscaría usuarios interesados en el deporte
-        return new ArrayList<>();
+        // basado en el deporte del partido, obtenemos los emails de los jugadores
+        Long deporteId = partido.getDeporte().getId();
+        return jugadorService.buscarJugadoresPorDeporte(deporteId).stream()
+                .map(Jugador::getEmail)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -250,9 +295,13 @@ public class NotificacionService {
     }
 
     /**
-     * Obtiene el número de notificadores registrados
+     * Crea un notificador basado en el tipo
      */
-    public int getNumeroNotificadores() {
-        return notificadores.size();
+    public void crearNotificadorPorTipo(String tipo) {
+        Notificador notificador = notificadorFactory.crearPorTipo(tipo);
+        if (notificador != null) {
+            agregarNotificador(notificador);
+        }
     }
-} 
+
+}
