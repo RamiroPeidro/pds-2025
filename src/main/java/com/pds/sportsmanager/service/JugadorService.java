@@ -223,4 +223,11 @@ public class JugadorService {
             throw new IllegalArgumentException("La contraseña debe tener al menos 6 caracteres");
         }
     }
+
+    public List<Jugador> buscarJugadoresPorDeporte(Long deporteId) {
+        logger.info("Buscando jugadores por deporte: {}", deporteId);
+        List<Jugador> jug = jugadorRepository.findByDeporteFavorito(deporteId);
+        logger.info("Jugadores encontrados: {}", jug);
+        return jug;
+    }
 } 

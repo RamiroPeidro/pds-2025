@@ -25,14 +25,16 @@ public class NotificacionService {
 
     private final List<Notificador> notificadores = new ArrayList<>();
     private final NotificadorFactory notificadorFactory;
+    private final JugadorService jugadorService;
     /**
      * Constructor por defecto
      */
     private final PreferenciaNotificacionServiceImpl preferenciasService;
 
-    public NotificacionService(PreferenciaNotificacionServiceImpl preferenciasService, NotificadorFactory notificadorFactory) {
+    public NotificacionService(PreferenciaNotificacionServiceImpl preferenciasService, NotificadorFactory notificadorFactory, JugadorService jugadorService) {
         this.preferenciasService = preferenciasService;
         this.notificadorFactory = notificadorFactory;
+        this.jugadorService = jugadorService;
     }
 
 
@@ -59,6 +61,12 @@ public class NotificacionService {
         log.info("Notificando creación del partido: {}", partido.getId());
         
         List<String> destinatarios = obtenerDestinatariosParaDeporte(partido);
+
+        if (destinatarios.isEmpty()) {
+            log.warn("No hay destinatarios para el partido: {}", partido.getId());
+            return;
+        }
+
         String mensaje = String.format(
             "¡Nuevo partido de %s! '%s' - %s. Faltan %d jugadores.",
             partido.getDeporte().getNombre(),
@@ -75,6 +83,7 @@ public class NotificacionService {
         );
         
         notificarTodos(evento);
+        log.info("Notificación de partido creado enviada a: {}", destinatarios);
     }
 
     /**
@@ -269,9 +278,11 @@ public class NotificacionService {
      * Esto podría conectarse con un servicio de preferencias de usuario
      */
     private List<String> obtenerDestinatariosParaDeporte(Partido partido) {
-        // Por ahora, retorna lista vacía
-        // En una implementación real, buscaría usuarios interesados en el deporte
-        return new ArrayList<>();
+        // basado en el deporte del partido, obtenemos los emails de los jugadores
+        Long deporteId = partido.getDeporte().getId();
+        return jugadorService.buscarJugadoresPorDeporte(deporteId).stream()
+                .map(Jugador::getEmail)
+                .collect(Collectors.toList());
     }
 
     /**

@@ -27,11 +27,12 @@ public class NotificadorEmail implements Notificador {
     public void notificar(EventSingle evento) {
 
         log.info("Enviando notificación por email: {} a {} destinatario",
-                evento.tipo(), evento.destinatario());
+                evento.tipo(), evento.getDestinatario());
 
         CompletableFuture.runAsync(() -> {
             try {
                 enviarEmailsAsincrono(evento);
+                log.info("📧 EMAIL ENVIADO - Tipo: {} | Destinatario: {}", evento.tipo(), evento.destinatario());
             } catch (Exception e) {
                 log.error("Error enviando emails para evento {}: {}", evento.tipo(), e.getMessage());
             }
@@ -60,9 +61,9 @@ public class NotificadorEmail implements Notificador {
         String cuerpoHtml = generarCuerpoHtml(evento);
 
             try {
-                enviarEmailIndividual(evento.destinatario(), asunto, cuerpoHtml);
+                enviarEmailIndividual(evento.getDestinatario(), asunto, cuerpoHtml);
             } catch (Exception e) {
-                log.error("Error enviando email a {}: {}", evento.destinatario(), e.getMessage());
+                log.error("Error enviando email a {}: {}", evento.getDestinatario(), e.getMessage());
             }
     }
 
