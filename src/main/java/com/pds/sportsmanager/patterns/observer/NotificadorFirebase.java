@@ -25,10 +25,10 @@ public class NotificadorFirebase implements Notificador {
     // Inyectar FirebaseMessaging
 
     @Override
-    public void notificar(NotificacionEvent evento) {
+    public void notificar(EventSingle evento) {
 
-        log.info("Enviando notificación push: {} a {} dispositivos", 
-                evento.tipo(), evento.destinatarios().size());
+        log.info("Enviando notificación push: {} a {} dispositivo",
+                evento.tipo(), evento.destinatario());
 
         CompletableFuture.runAsync(() -> {
             try {
@@ -57,26 +57,26 @@ public class NotificadorFirebase implements Notificador {
     /**
      * Enviar notificaciones push usando Firebase Admin SDK
      */
-    private void enviarNotificacionesAsincrono(NotificacionEvent evento) {
+    private void enviarNotificacionesAsincrono(EventSingle evento) {
         var notificacionData = crearNotificacionData(evento);
         log.debug("Datos de notificación creados: {}", notificacionData);
 
-        for (String emails : evento.destinatarios()) {
+//        for (String emails : evento.destinatarios()) {
             try {
-                enviarNotificacionIndividual(emails, notificacionData);
-                log.debug("Push notification enviada exitosamente a token: {}***", 
-                         emails.substring(0, Math.min(10, emails.length())));
+                enviarNotificacionIndividual(evento.destinatario(), notificacionData);
+                log.debug("Push notification enviada exitosamente a token: {}***",
+                        evento.destinatario());
             } catch (Exception e) {
-                log.error("Error enviando push notification a token {}: {}", 
-                         emails.substring(0, Math.min(10, emails.length())), e.getMessage());
+                log.error("Error enviando push notification a token {}: {}",
+                        evento.destinatario());
             }
-        }
+//        }
     }
 
     /**
      * Crea los datos de la notificación usando records
      */
-    private NotificacionData crearNotificacionData(NotificacionEvent evento) {
+    private NotificacionData crearNotificacionData(EventSingle evento) {
         String titulo = generarTitulo(evento);
         String cuerpo = evento.mensaje();
         String icono = generarIcono(evento);
@@ -99,7 +99,7 @@ public class NotificadorFirebase implements Notificador {
     /**
      * Genera el título usando switch expressions
      */
-    private String generarTitulo(NotificacionEvent evento) {
+    private String generarTitulo(EventSingle evento) {
         return switch (evento.tipo()) {
             case PARTIDO_CREADO -> "🏆 Nuevo Partido Disponible";
             case PARTIDO_ARMADO -> "✅ Partido Armado";
@@ -115,7 +115,7 @@ public class NotificadorFirebase implements Notificador {
     /**
      * Genera el icono de la notificación
      */
-    private String generarIcono(NotificacionEvent evento) {
+    private String generarIcono(EventSingle evento) {
         return switch (evento.tipo()) {
             case PARTIDO_CREADO, JUGADOR_UNIDO -> "ic_partido_nuevo";
             case PARTIDO_ARMADO, PARTIDO_CONFIRMADO -> "ic_partido_confirmado";
@@ -128,7 +128,7 @@ public class NotificadorFirebase implements Notificador {
     /**
      * Genera el sonido de la notificación
      */
-    private String generarSonido(NotificacionEvent evento) {
+    private String generarSonido(EventSingle evento) {
         return switch (evento.tipo()) {
             case PARTIDO_CREADO, JUGADOR_UNIDO -> "notification_success";
             case PARTIDO_ARMADO, PARTIDO_CONFIRMADO -> "notification_important";

@@ -24,10 +24,10 @@ public class NotificadorEmail implements Notificador {
     private final EmailAdapter emailAdapter;
 
     @Override
-    public void notificar(NotificacionEvent evento) {
+    public void notificar(EventSingle evento) {
 
-        log.info("Enviando notificación por email: {} a {} destinatarios", 
-                evento.tipo(), evento.destinatarios().size());
+        log.info("Enviando notificación por email: {} a {} destinatario",
+                evento.tipo(), evento.destinatario());
 
         CompletableFuture.runAsync(() -> {
             try {
@@ -55,23 +55,21 @@ public class NotificadorEmail implements Notificador {
     /**
      * Envía emails usando switch expressions
      */
-    private void enviarEmailsAsincrono(NotificacionEvent evento) {
+    private void enviarEmailsAsincrono(EventSingle evento) {
         String asunto = generarAsunto(evento);
         String cuerpoHtml = generarCuerpoHtml(evento);
 
-        for (String destinatario : evento.destinatarios()) {
             try {
-                enviarEmailIndividual(destinatario, asunto, cuerpoHtml);
+                enviarEmailIndividual(evento.destinatario(), asunto, cuerpoHtml);
             } catch (Exception e) {
-                log.error("Error enviando email a {}: {}", destinatario, e.getMessage());
+                log.error("Error enviando email a {}: {}", evento.destinatario(), e.getMessage());
             }
-        }
     }
 
     /**
      * Genera el asunto usando switch expressions
      */
-    private String generarAsunto(NotificacionEvent evento) {
+    private String generarAsunto(EventSingle evento) {
         return switch (evento.tipo()) {
             case PARTIDO_CREADO -> "🏆 Nuevo partido disponible";
             case PARTIDO_ARMADO -> "✅ Partido armado - Esperando confirmación";
@@ -87,7 +85,7 @@ public class NotificadorEmail implements Notificador {
     /**
      * Genera el cuerpo HTML usando text blocks
      */
-    private String generarCuerpoHtml(NotificacionEvent evento) {
+    private String generarCuerpoHtml(EventSingle evento) {
         String timestamp = evento.timestamp().format(FORMATTER);
         
         return """

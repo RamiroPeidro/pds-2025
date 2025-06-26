@@ -4,6 +4,7 @@ import com.pds.sportsmanager.model.entity.Jugador;
 import com.pds.sportsmanager.model.entity.Partido;
 import com.pds.sportsmanager.model.entity.PreferenciaNotificacion;
 import com.pds.sportsmanager.model.enums.TipoNotificacion;
+import com.pds.sportsmanager.patterns.observer.EventSingle;
 import com.pds.sportsmanager.patterns.observer.NotificacionEvent;
 import com.pds.sportsmanager.patterns.observer.Notificador;
 import com.pds.sportsmanager.patterns.observer.NotificadorFactory;
@@ -233,10 +234,19 @@ public class NotificacionService {
             PreferenciaNotificacion pref = preferenciasService.obtenerPorEmail(email)
                     .orElse(PreferenciaNotificacion.porDefecto());
 
+            // Crea un evento solo para ese destinatario
+            EventSingle eventoIndividual = new EventSingle(
+                evento.tipo(),
+                evento.mensaje(),
+                email,
+                evento.partidoId(),
+                evento.timestamp()
+            );
+
             for (Notificador notificador : notificadores) {
                 if (notificador.estaHabilitado(pref)) {
                     try {
-                        notificador.notificar(evento);
+                        notificador.notificar(eventoIndividual);
                     } catch (Exception e) {
                         log.error("Error al notificar a {} por {}: {}", email, notificador.getClass().getSimpleName(), e.getMessage());
                     }

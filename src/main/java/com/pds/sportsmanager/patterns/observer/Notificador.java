@@ -10,7 +10,7 @@ public interface Notificador {
     /**
      * Recibe y procesa un evento de notificación
      */
-    void notificar(NotificacionEvent evento);
+    void notificar(EventSingle evento);
     
     /**
      * Tipo de notificador
