@@ -16,8 +16,8 @@ public class PreferenciaNotificacion {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "usuario_id", referencedColumnName = "id", unique = true)
-    private Usuario usuario;
+    @JoinColumn(name = "jugador_id", referencedColumnName = "id", unique = true)
+    private Jugador jugador;
 
     @Column(nullable = false, columnDefinition = "boolean default true")
     private boolean email = true;

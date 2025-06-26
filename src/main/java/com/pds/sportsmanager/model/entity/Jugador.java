@@ -83,6 +83,9 @@ public class Jugador {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @OneToOne(mappedBy = "jugador", cascade = CascadeType.ALL, orphanRemoval = true)
+    private PreferenciaNotificacion preferenciaNotificacion;
+
     // Agrega un nuevo partido organizado por este jugador
     public void crearPartido(Partido partido) {
         partidosOrganizados.add(partido);
