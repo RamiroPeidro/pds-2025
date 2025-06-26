@@ -3,6 +3,7 @@ package com.pds.sportsmanager.controller;
 import com.pds.sportsmanager.model.dto.JugadorDTO;
 import com.pds.sportsmanager.model.dto.JugadorRequestDTO;
 import com.pds.sportsmanager.model.entity.Jugador;
+import com.pds.sportsmanager.model.entity.Partido;
 import com.pds.sportsmanager.service.JugadorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -178,4 +179,33 @@ public class JugadorController {
                 .createdAt(jugador.getCreatedAt())
                 .build();
     }
+    @PostMapping("/{jugadorId}/crear-partido")
+    public ResponseEntity<Void> crearPartido(@PathVariable Long jugadorId, @RequestBody Partido partido) {
+        jugadorService.crearPartido(jugadorId, partido);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PostMapping("/{jugadorId}/aceptar-partido/{partidoId}")
+    public ResponseEntity<Void> aceptarPartido(@PathVariable Long jugadorId, @PathVariable Long partidoId) {
+        jugadorService.aceptarPartido(jugadorId, partidoId);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{jugadorId}/partidos-disponibles")
+    public ResponseEntity<List<Partido>> buscarPartidosDisponibles(@PathVariable Long jugadorId) {
+        return ResponseEntity.ok(jugadorService.buscarPartidosDisponibles(jugadorId));
+    }
+
+    @PostMapping("/{jugadorId}/deporte-favorito")
+    public ResponseEntity<Void> establecerDeporteFavorito(@PathVariable Long jugadorId, @RequestParam String deporte) {
+        jugadorService.establecerDeporteFavorito(jugadorId, deporte);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{jugadorId}/agregar-deporte")
+    public ResponseEntity<Void> agregarDeporte(@PathVariable Long jugadorId, @RequestParam Long deporteId) {
+        jugadorService.agregarDeporteFavorito(jugadorId, deporteId);
+        return ResponseEntity.ok().build();
+    }
+
 } 
