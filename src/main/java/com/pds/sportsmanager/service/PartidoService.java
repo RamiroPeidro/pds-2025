@@ -28,22 +28,25 @@ public class PartidoService {
     private static final Logger logger = LoggerFactory.getLogger(PartidoService.class);
 
     private final PartidoRepository partidoRepository;
-    private final UsuarioService usuarioService;
+    private final JugadorService jugadorService;
     private final NotificacionService notificacionService;
     private final DeporteService deporteService;
     private final UbicacionService ubicacionService;
+    private final EstrategiaEmparejamientoFactory estrategiaFactory;
 
     @Autowired
     public PartidoService(PartidoRepository partidoRepository, 
-                         UsuarioService usuarioService,
+                         JugadorService jugadorService,
                          NotificacionService notificacionService,
                          DeporteService deporteService,
-                         UbicacionService ubicacionService) {
+                         UbicacionService ubicacionService,
+                         EstrategiaEmparejamientoFactory estrategiaFactory) {
         this.partidoRepository = partidoRepository;
-        this.usuarioService = usuarioService;
+        this.jugadorService = jugadorService;
         this.notificacionService = notificacionService;
         this.deporteService = deporteService;
         this.ubicacionService = ubicacionService;
+        this.estrategiaFactory = estrategiaFactory;
     }
 
     /**
@@ -68,7 +71,7 @@ public class PartidoService {
         
         Jugador owner;
         try {
-            owner = usuarioService.obtenerUsuarioPorId(partidoDTO.ownerId());
+            owner = jugadorService.obtenerJugadorPorId(partidoDTO.ownerId());
             if (owner == null) {
                 logger.warn("Jugador no encontrado con ID: {}", partidoDTO.ownerId());
                 return Optional.empty();
@@ -135,7 +138,7 @@ public class PartidoService {
         logger.info("Agregando jugador {} al partido {}", jugadorId, partidoId);
         
         Partido partido = obtenerPartidoPorIdInterno(partidoId);
-        Jugador jugador = usuarioService.obtenerUsuarioPorId(jugadorId);
+        Jugador jugador = jugadorService.obtenerJugadorPorId(jugadorId);
         
         // Usar el patrón State para agregar el jugador
         partido.agregarJugador(jugador);
@@ -197,13 +200,27 @@ public class PartidoService {
     }
 
     /**
-     * Busca partidos usando una estrategia específica
+     * Busca partidos usando una estrategia por nombre (para Controller)
+     */
+    @Transactional(readOnly = true)
+    public List<PartidoBusquedaResult> buscarPartidos(Long usuarioId, String estrategia) {
+        logger.info("Buscando partidos para usuario {} con estrategia {}", usuarioId, estrategia);
+        
+        // Obtener la estrategia usando la Factory
+        EstrategiaEmparejamiento estrategiaObj = estrategiaFactory.obtenerEstrategia(estrategia);
+        
+        // Delegar al método que recibe la estrategia
+        return buscarPartidos(usuarioId, estrategiaObj);
+    }
+
+    /**
+     * Busca partidos usando una estrategia específica (para uso interno)
      */
     @Transactional(readOnly = true)
     public List<PartidoBusquedaResult> buscarPartidos(Long usuarioId, EstrategiaEmparejamiento estrategia) {
         logger.info("Buscando partidos para usuario {} con estrategia {}", usuarioId, estrategia.getNombre());
         
-        Jugador jugador = usuarioService.obtenerUsuarioPorId(usuarioId);
+        Jugador jugador = jugadorService.obtenerJugadorPorId(usuarioId);
         List<Partido> partidosDisponibles = partidoRepository.findPartidosNecesitanJugadores(LocalDateTime.now());
         
         // Convertir a DTO con información de distancia
@@ -231,7 +248,7 @@ public class PartidoService {
      */
     @Transactional(readOnly = true)
     public List<Partido> obtenerPartidosDeUsuario(Long usuarioId) {
-        Jugador jugador = usuarioService.obtenerUsuarioPorId(usuarioId);
+        Jugador jugador = jugadorService.obtenerJugadorPorId(usuarioId);
         return partidoRepository.findByOwnerWithRelations(jugador);
     }
 

@@ -7,10 +7,10 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public record UsuarioRequestDTO(
-    @NotBlank(message = "El nombre de usuario es obligatorio")
-    @Size(min = 3, max = 50, message = "El nombre de usuario debe tener entre 3 y 50 caracteres")
-    String nombreUsuario,
+public record JugadorRequestDTO(
+    @NotBlank(message = "El nombre es obligatorio")
+    @Size(min = 3, max = 50, message = "El nombre debe tener entre 3 y 50 caracteres")
+    String nombre,
     
     @NotBlank(message = "El email es obligatorio")
     @Email(message = "El email debe tener un formato válido")
@@ -22,7 +22,7 @@ public record UsuarioRequestDTO(
     
     NivelDeJuego nivelDeJuego,
     
-    Long deporteFavoritoId,
+    String deporteFavorito,
     
     @Valid
     Ubicacion ubicacion

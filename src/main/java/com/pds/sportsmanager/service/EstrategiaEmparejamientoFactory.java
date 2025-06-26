@@ -18,15 +18,19 @@ public class EstrategiaEmparejamientoFactory {
     
     @Qualifier("estrategiaPorCercania")
     private final EstrategiaEmparejamiento estrategiaPorCercania;
+    
+    @Qualifier("estrategiaPorHistorial")
+    private final EstrategiaEmparejamiento estrategiaPorHistorial;
 
     /**
      * Obtiene la estrategia por nombre
-     * @param nombre "nivel" o "cercania"
+     * @param nombre "nivel", "cercania" o "historial"
      * @return la estrategia correspondiente
      */
     public EstrategiaEmparejamiento obtenerEstrategia(String nombre) {
         return switch (nombre.toLowerCase()) {
             case "cercania" -> estrategiaPorCercania;
+            case "historial" -> estrategiaPorHistorial;
             case "nivel" -> estrategiaPorNivel;
             default -> estrategiaPorNivel; // Por defecto
         };
@@ -44,5 +48,12 @@ public class EstrategiaEmparejamientoFactory {
      */
     public EstrategiaEmparejamiento porCercania() {
         return estrategiaPorCercania;
+    }
+
+    /**
+     * Retorna la estrategia por historial
+     */
+    public EstrategiaEmparejamiento porHistorial() {
+        return estrategiaPorHistorial;
     }
 } 
