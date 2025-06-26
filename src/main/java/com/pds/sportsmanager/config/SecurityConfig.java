@@ -29,12 +29,12 @@ public class SecurityConfig {
                 .requestMatchers("/api-docs/**").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
                 
-                .requestMatchers("/api/**").authenticated()
-                
-                .anyRequest().authenticated()
+                // Para desarrollo - permitir acceso a todos los endpoints de API
+                .anyRequest().permitAll()
             )
-            .headers(AbstractHttpConfigurer::disable)
-            .httpBasic(httpBasic -> {});
+            .headers(AbstractHttpConfigurer::disable);
+            // HTTP Basic authentication deshabilitado para desarrollo
+            // .httpBasic(httpBasic -> {});
 
         return http.build();
     }
