@@ -25,6 +25,8 @@ public record JugadorRequestDTO(
     String deporteFavorito,
     
     @Valid
-    Ubicacion ubicacion
+    Ubicacion ubicacion,
+
+    PreferenciaDTO preferenciaDTO
 ) {
 } 

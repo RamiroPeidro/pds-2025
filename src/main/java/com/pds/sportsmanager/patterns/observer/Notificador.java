@@ -1,5 +1,7 @@
 package com.pds.sportsmanager.patterns.observer;
 
+import com.pds.sportsmanager.model.entity.PreferenciaNotificacion;
+
 /**
  * Patrón Observer - Interfaz para notificadores (Observers)
  */
@@ -8,7 +10,7 @@ public interface Notificador {
     /**
      * Recibe y procesa un evento de notificación
      */
-    void notificar(NotificacionEvent evento);
+    void notificar(EventSingle evento);
     
     /**
      * Tipo de notificador
@@ -18,5 +20,5 @@ public interface Notificador {
     /**
      * Verifica si el notificador está habilitado
      */
-    boolean estaHabilitado();
+    boolean estaHabilitado(PreferenciaNotificacion preferencia);
 } 

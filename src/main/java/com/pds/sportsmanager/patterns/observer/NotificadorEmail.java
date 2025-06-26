@@ -1,5 +1,6 @@
 package com.pds.sportsmanager.patterns.observer;
 
+import com.pds.sportsmanager.model.entity.PreferenciaNotificacion;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -21,22 +22,18 @@ public class NotificadorEmail implements Notificador {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private final EmailAdapter emailAdapter;
-    
-    //TODO: Inyectar EmailService o JavaMailSender
 
     @Override
-    public void notificar(NotificacionEvent evento) {
-        if (!estaHabilitado()) {
-            log.debug("Notificador Email deshabilitado, saltando envío");
-            return;
-        }
+    public void notificar(EventSingle evento) {
 
-        log.info("Enviando notificación por email: {} a {} destinatarios", 
-                evento.tipo(), evento.destinatarios().size());
+        log.info("Enviando notificación por email: {} a {} destinatario",
+                evento.tipo(), evento.getDestinatario());
 
         CompletableFuture.runAsync(() -> {
             try {
+                System.out.println("Enviando email de forma asíncrona para el evento: " + evento.tipo());
                 enviarEmailsAsincrono(evento);
+                log.info("EMAIL ENVIADO - Tipo: {} | Destinatario: {}", evento.tipo(), evento.destinatario());
             } catch (Exception e) {
                 log.error("Error enviando emails para evento {}: {}", evento.tipo(), e.getMessage());
             }
@@ -49,32 +46,33 @@ public class NotificadorEmail implements Notificador {
     }
 
     @Override
-    public boolean estaHabilitado() {
-        //TODO: Verificar configuración, credenciales, etc.
-        return true;
+    public boolean estaHabilitado(PreferenciaNotificacion preferencia) {
+        if (emailAdapter == null) {
+            log.warn("EmailAdapter no configurado, NotificadorEmail deshabilitado");
+            return false;
+        }
+        return preferencia.estaHabilitadaEmail();
     }
 
     /**
      * Envía emails usando switch expressions
      */
-    private void enviarEmailsAsincrono(NotificacionEvent evento) {
+    private void enviarEmailsAsincrono(EventSingle evento) {
         String asunto = generarAsunto(evento);
         String cuerpoHtml = generarCuerpoHtml(evento);
 
-        for (String destinatario : evento.destinatarios()) {
             try {
-                enviarEmailIndividual(destinatario, asunto, cuerpoHtml);
-                log.debug("Email enviado exitosamente a: {}", destinatario);
+                System.out.println("Enviando email a: " + evento.getDestinatario());
+                enviarEmailIndividual(evento.getDestinatario(), asunto, cuerpoHtml);
             } catch (Exception e) {
-                log.error("Error enviando email a {}: {}", destinatario, e.getMessage());
+                log.error("Error enviando email a {}: {}", evento.getDestinatario(), e.getMessage());
             }
-        }
     }
 
     /**
      * Genera el asunto usando switch expressions
      */
-    private String generarAsunto(NotificacionEvent evento) {
+    private String generarAsunto(EventSingle evento) {
         return switch (evento.tipo()) {
             case PARTIDO_CREADO -> "🏆 Nuevo partido disponible";
             case PARTIDO_ARMADO -> "✅ Partido armado - Esperando confirmación";
@@ -90,9 +88,9 @@ public class NotificadorEmail implements Notificador {
     /**
      * Genera el cuerpo HTML usando text blocks
      */
-    private String generarCuerpoHtml(NotificacionEvent evento) {
+    private String generarCuerpoHtml(EventSingle evento) {
         String timestamp = evento.timestamp().format(FORMATTER);
-        
+
         return """
                 <!DOCTYPE html>
                 <html>
@@ -101,7 +99,7 @@ public class NotificadorEmail implements Notificador {
                     <style>
                         body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5; }
                         .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-                        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; }
+                        .header { background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); color: white; padding: 20px; text-align: center; }
                         .content { padding: 30px; }
                         .footer { background: #f8f9fa; padding: 15px; text-align: center; font-size: 12px; color: #666; }
                         .btn { display: inline-block; background: #28a745; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 10px 0; }
@@ -124,20 +122,25 @@ public class NotificadorEmail implements Notificador {
                 </body>
                 </html>
                 """.formatted(
-                    generarAsunto(evento),
-                    evento.mensaje(),
-                    evento.partidoId() != null ? 
+                generarAsunto(evento),
+                evento.mensaje(),
+                evento.partidoId() != null ?
                         "<a href=\"#\" class=\"btn\">Ver Partido #" + evento.partidoId() + "</a>" : "",
-                    timestamp
-                );
+                timestamp
+        );
     }
+
 
     /**
      * Simula el envío de email individual
      */
     private void enviarEmailIndividual(String destinatario, String asunto, String cuerpoHtml) {
-        //TODO: Enviar email usando JavaMailSender o un servicio externo
-        log.info("📧 EMAIL ENVIADO - Para: {} | Asunto: {}", destinatario, asunto);
-        
+        try {
+            log.info("Enviando email a: {} | Asunto: {}", destinatario, asunto);
+            emailAdapter.enviarNotificacion(destinatario, asunto, cuerpoHtml);
+            log.info("📧 EMAIL ENVIADO - Para: {} | Asunto: {}", destinatario, asunto);
+        } catch (Exception e) {
+            log.error("Error al enviar email: {}", e.getMessage());
+        }
     }
-} 
+}

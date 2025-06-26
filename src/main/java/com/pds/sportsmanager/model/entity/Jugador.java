@@ -55,17 +55,16 @@ public class Jugador {
 
     @Column(name = "deporte_favorito")
     private String deporteFavorito; // Campo texto simple según DB
-    
-    @ManyToMany(fetch = FetchType.LAZY)
+
+    @ManyToMany
     @JoinTable(
             name = "jugador_deporte",
             joinColumns = @JoinColumn(name = "jugador_id"),
             inverseJoinColumns = @JoinColumn(name = "deporte_id")
     )
-    @ToString.Exclude
-    private List<Deporte> deportesFavs = new ArrayList<>(); // Lista de deportes según diagrama
+    private List<Deporte> deportesFavs;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ubicacion_id")
     private Ubicacion ubicacion;
 
@@ -82,6 +81,9 @@ public class Jugador {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @OneToOne(mappedBy = "jugador", cascade = CascadeType.ALL, orphanRemoval = true)
+    private PreferenciaNotificacion preferenciaNotificacion;
 
     // Agrega un nuevo partido organizado por este jugador
     public void crearPartido(Partido partido) {
