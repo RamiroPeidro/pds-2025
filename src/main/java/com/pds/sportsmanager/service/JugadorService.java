@@ -1,6 +1,8 @@
 package com.pds.sportsmanager.service;
 
+import com.pds.sportsmanager.model.entity.Deporte;
 import com.pds.sportsmanager.model.entity.Jugador;
+import com.pds.sportsmanager.model.entity.Partido;
 import com.pds.sportsmanager.model.entity.JugadorDeporte;
 import com.pds.sportsmanager.repository.JugadorRepository;
 import org.slf4j.Logger;
@@ -9,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.pds.sportsmanager.repository.PartidoRepository;
+import com.pds.sportsmanager.repository.DeporteRepository;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -24,6 +28,17 @@ public class JugadorService {
 
     private final JugadorRepository jugadorRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PartidoRepository partidoRepository;
+    private final DeporteRepository deporteRepository;
+
+
+    @Autowired
+    public JugadorService(
+            JugadorRepository jugadorRepository,
+            PartidoRepository partidoRepository,
+            DeporteRepository deporteRepository,
+            PasswordEncoder passwordEncoder
+    ) {
     private final JugadorDeporteService jugadorDeporteService;
     private final PreferenciaNotificacionService preferenciaNotificacionService;
 
@@ -31,10 +46,13 @@ public class JugadorService {
     @Autowired
     public JugadorService(JugadorRepository jugadorRepository, PasswordEncoder passwordEncoder, JugadorDeporteService jugadorDeporteService, PreferenciaNotificacionService preferenciaNotificacionService) {
         this.jugadorRepository = jugadorRepository;
+        this.partidoRepository = partidoRepository;
+        this.deporteRepository = deporteRepository;
         this.passwordEncoder = passwordEncoder;
         this.jugadorDeporteService = jugadorDeporteService;
         this.preferenciaNotificacionService = preferenciaNotificacionService;
     }
+
 
     /**
      * Registra un nuevo jugador
@@ -235,6 +253,40 @@ public class JugadorService {
             throw new IllegalArgumentException("La contraseña debe tener al menos 6 caracteres");
         }
     }
+    public void crearPartido(Long jugadorId, Partido partido) {
+        Jugador jugador = obtenerJugadorPorId(jugadorId);
+        jugador.crearPartido(partido);
+        partidoRepository.save(partido);
+        jugadorRepository.save(jugador);
+    }
+
+    public void aceptarPartido(Long jugadorId, Long partidoId) {
+        Jugador jugador = obtenerJugadorPorId(jugadorId);
+        Partido partido = partidoRepository.findById(partidoId)
+                .orElseThrow(() -> new RuntimeException("Partido no encontrado"));
+        jugador.aceptarPartido(partido);
+        partidoRepository.save(partido);
+        jugadorRepository.save(jugador);
+    }
+
+    public List<Partido> buscarPartidosDisponibles(Long jugadorId) {
+        Jugador jugador = obtenerJugadorPorId(jugadorId);
+        List<Partido> disponibles = partidoRepository.findAll();
+        return jugador.buscarPartido(disponibles);
+    }
+
+    public void agregarDeporteFavorito(Long jugadorId, Long deporteId) {
+        Jugador jugador = obtenerJugadorPorId(jugadorId);
+        Deporte deporte = deporteRepository.findById(deporteId)
+                .orElseThrow(() -> new RuntimeException("Deporte no encontrado"));
+        jugador.agregarDeporte(deporte);
+        jugadorRepository.save(jugador);
+    }
+
+    public void establecerDeporteFavorito(Long jugadorId, String nombreDeporte) {
+        Jugador jugador = obtenerJugadorPorId(jugadorId);
+        jugador.establecerDeporteFavorito(nombreDeporte);
+        jugadorRepository.save(jugador);
 
     /**
      * Busca jugadores por deporte favorito (múltiples deportes + fallback)
