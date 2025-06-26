@@ -5,9 +5,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface PreferenciaNotificacionService extends JpaRepository<PreferenciaNotificacion, Long> {
+public interface PreferenciaNotificacionService {
     Optional<PreferenciaNotificacion> obtenerPorUsuarioId(Long usuarioId);
 
     Optional<PreferenciaNotificacion> obtenerPorEmail(String email);
+
+    void guardar(PreferenciaNotificacion preferenciaNotificacion);
 
 }

@@ -24,6 +24,13 @@ public class PreferenciaNotificacionServiceImpl implements PreferenciaNotificaci
         return repository.findByUsuarioEmail(email);
     }
 
+    @Override
+    public void guardar(PreferenciaNotificacion preferenciaNotificacion) {
+        repository.save(preferenciaNotificacion);
+    }
+
+
+
 
 
 }
