@@ -39,9 +39,9 @@ public interface JugadorRepository extends JpaRepository<Jugador, Long> {
     List<Jugador> findByNivelDeJuego(NivelDeJuego nivel);
     
     /**
-     * Busca jugadores por deportes favoritos
+     * Busca jugadores por deportes favoritos (usando String deporteFavorito)
      */
-    @Query("SELECT j FROM Jugador j JOIN j.deportesFavs d WHERE d.id = :deporteId")
+    @Query("SELECT j FROM Jugador j JOIN Deporte d ON j.deporteFavorito = d.nombre WHERE d.id = :deporteId")
     List<Jugador> findByDeporteFavorito(@Param("deporteId") Long deporteId);
     
     /**
