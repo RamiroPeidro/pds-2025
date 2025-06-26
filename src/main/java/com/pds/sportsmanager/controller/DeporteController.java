@@ -38,61 +38,45 @@ public class DeporteController {
         Integer duracionEstandarMinutos
     ) {}
 
+    // Método helper para convertir entidad a DTO
+    private DeporteOutputDTO toDTO(Deporte deporte) {
+        return new DeporteOutputDTO(
+            deporte.getId(),
+            deporte.getNombre(),
+            deporte.getDescripcion(),
+            deporte.getMinJugadoresPorEquipo(),
+            deporte.getMaxJugadoresPorEquipo(),
+            deporte.getDuracionEstandarMinutos()
+        );
+    }
+
     @PostMapping
     public ResponseEntity<DeporteOutputDTO> crearDeporte(@RequestBody DeporteInputDTO deporteDTO) {
         Deporte deporte = new Deporte(deporteDTO.nombre(), deporteDTO.descripcion(),
                 deporteDTO.minJugadoresPorEquipo(), deporteDTO.maxJugadoresPorEquipo(),
                 deporteDTO.duracionEstandarMinutos());
         Deporte nuevoDeporte = deporteService.crearDeporte(deporte);
-        return ResponseEntity.ok(DeporteOutputDTO.builder()
-                .id(nuevoDeporte.getId())
-                .nombre(nuevoDeporte.getNombre())
-                .descripcion(nuevoDeporte.getDescripcion())
-                .minJugadoresPorEquipo(nuevoDeporte.getMinJugadoresPorEquipo())
-                .maxJugadoresPorEquipo(nuevoDeporte.getMaxJugadoresPorEquipo())
-                .duracionEstandarMinutos(nuevoDeporte.getDuracionEstandarMinutos())
-                .build());
+        return ResponseEntity.ok(toDTO(nuevoDeporte));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<DeporteOutputDTO> obtenerDeportePorId(@PathVariable Long id) {
         return deporteService.obtenerDeportePorId(id)
-                .map(deporte -> ResponseEntity.ok(DeporteOutputDTO.builder()
-                        .id(deporte.getId())
-                        .nombre(deporte.getNombre())
-                        .descripcion(deporte.getDescripcion())
-                        .minJugadoresPorEquipo(deporte.getMinJugadoresPorEquipo())
-                        .maxJugadoresPorEquipo(deporte.getMaxJugadoresPorEquipo())
-                        .duracionEstandarMinutos(deporte.getDuracionEstandarMinutos())
-                        .build()))
+                .map(deporte -> ResponseEntity.ok(toDTO(deporte)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/nombre/{nombre}")
     public ResponseEntity<DeporteOutputDTO> obtenerDeportePorNombre(@PathVariable String nombre) {
         return deporteService.obtenerDeportePorNombre(nombre)
-                .map(deporte -> ResponseEntity.ok(DeporteOutputDTO.builder()
-                        .id(deporte.getId())
-                        .nombre(deporte.getNombre())
-                        .descripcion(deporte.getDescripcion())
-                        .minJugadoresPorEquipo(deporte.getMinJugadoresPorEquipo())
-                        .maxJugadoresPorEquipo(deporte.getMaxJugadoresPorEquipo())
-                        .duracionEstandarMinutos(deporte.getDuracionEstandarMinutos())
-                        .build()))
+                .map(deporte -> ResponseEntity.ok(toDTO(deporte)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping
     public ResponseEntity<List<DeporteOutputDTO>> listarTodosLosDeportes() {
         List<DeporteOutputDTO> dtoList = deporteService.listarTodosLosDeportes().stream()
-                .map(deporte -> DeporteOutputDTO.builder()
-                        .id(deporte.getId())
-                        .nombre(deporte.getNombre())
-                        .descripcion(deporte.getDescripcion())
-                        .minJugadoresPorEquipo(deporte.getMinJugadoresPorEquipo())
-                        .maxJugadoresPorEquipo(deporte.getMaxJugadoresPorEquipo())
-                        .duracionEstandarMinutos(deporte.getDuracionEstandarMinutos())
-                        .build())
+                .map(this::toDTO)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtoList);
     }
@@ -102,14 +86,7 @@ public class DeporteController {
             @RequestParam Integer minJugadores,
             @RequestParam Integer maxJugadores) {
         List<DeporteOutputDTO> dtoList = deporteService.buscarDeportesPorCantidadJugadores(minJugadores, maxJugadores).stream()
-                .map(deporte -> DeporteOutputDTO.builder()
-                        .id(deporte.getId())
-                        .nombre(deporte.getNombre())
-                        .descripcion(deporte.getDescripcion())
-                        .minJugadoresPorEquipo(deporte.getMinJugadoresPorEquipo())
-                        .maxJugadoresPorEquipo(deporte.getMaxJugadoresPorEquipo())
-                        .duracionEstandarMinutos(deporte.getDuracionEstandarMinutos())
-                        .build())
+                .map(this::toDTO)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtoList);
     }
@@ -122,14 +99,7 @@ public class DeporteController {
                 deporteDTO.minJugadoresPorEquipo(), deporteDTO.maxJugadoresPorEquipo(),
                 deporteDTO.duracionEstandarMinutos());
         return deporteService.actualizarDeporte(id, deporte)
-                .map(deporteActualizado -> ResponseEntity.ok(DeporteOutputDTO.builder()
-                        .id(deporteActualizado.getId())
-                        .nombre(deporteActualizado.getNombre())
-                        .descripcion(deporteActualizado.getDescripcion())
-                        .minJugadoresPorEquipo(deporteActualizado.getMinJugadoresPorEquipo())
-                        .maxJugadoresPorEquipo(deporteActualizado.getMaxJugadoresPorEquipo())
-                        .duracionEstandarMinutos(deporteActualizado.getDuracionEstandarMinutos())
-                        .build()))
+                .map(deporteActualizado -> ResponseEntity.ok(toDTO(deporteActualizado)))
                 .orElse(ResponseEntity.notFound().build());
     }
 

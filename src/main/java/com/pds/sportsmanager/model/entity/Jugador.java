@@ -53,17 +53,17 @@ public class Jugador {
     @Column(name = "nivel_de_juego")
     private NivelDeJuego nivelDeJuego; // Cambiado de nivelDeJugador
 
-    @Column(name = "juego_preferido")
-    private String DeporteFavorito; // Nuevo campo
-
+    @Column(name = "deporte_favorito")
+    private String deporteFavorito; // Campo texto simple según DB
+    
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-            name = "jugador_deporte_favorito",
+            name = "jugador_deporte",
             joinColumns = @JoinColumn(name = "jugador_id"),
             inverseJoinColumns = @JoinColumn(name = "deporte_id")
     )
     @ToString.Exclude
-    private List<Deporte> deportesFavs = new ArrayList<>(); // Cambiado de deporteFavorito a lista
+    private List<Deporte> deportesFavs = new ArrayList<>(); // Lista de deportes según diagrama
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ubicacion_id")
@@ -112,10 +112,15 @@ public class Jugador {
         }
     }
 
-    // Agrega un deporte favorito si no está en la lista
-    public void agregarDeporte(Deporte deporte) {
-        if (!deportesFavs.contains(deporte)) {
-            deportesFavs.add(deporte);
+    // Establece el deporte favorito (solo uno como texto)
+    public void establecerDeporteFavorito(String deporte) {
+        this.deporteFavorito = deporte;
+    }
+
+    // Agrega un deporte favorito si no está en la lista (según diagrama UML)
+    public void agregarDeporte(Deporte favorito) {
+        if (!deportesFavs.contains(favorito)) {
+            deportesFavs.add(favorito);
         }
     }
 
