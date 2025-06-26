@@ -117,36 +117,36 @@ public class JugadorService {
     }
 
     /**
-     * Busca un jugador por nombre
+     * Busca un jugador por nombre con deportes favoritos cargados
      */
     @Transactional(readOnly = true)
     public Optional<Jugador> buscarPorNombre(String nombre) {
-        return jugadorRepository.findByNombre(nombre);
+        return jugadorRepository.findByNombreWithDeportesFavs(nombre);
     }
 
     /**
-     * Busca un jugador por email
+     * Busca un jugador por email con deportes favoritos cargados
      */
     @Transactional(readOnly = true)
     public Optional<Jugador> buscarPorEmail(String email) {
-        return jugadorRepository.findByEmail(email);
+        return jugadorRepository.findByEmailWithDeportesFavs(email);
     }
 
     /**
-     * Obtiene un jugador por ID
+     * Obtiene un jugador por ID con sus deportes favoritos cargados
      */
     @Transactional(readOnly = true)
     public Jugador obtenerJugadorPorId(Long id) {
-        return jugadorRepository.findById(id)
+        return jugadorRepository.findByIdWithDeportesFavs(id)
                 .orElseThrow(() -> new RuntimeException("Jugador no encontrado con ID: " + id));
     }
 
     /**
-     * Obtiene todos los jugadores
+     * Obtiene todos los jugadores con sus deportes favoritos cargados
      */
     @Transactional(readOnly = true)
     public List<Jugador> obtenerTodosLosJugadores() {
-        return jugadorRepository.findAll();
+        return jugadorRepository.findAllWithDeportesFavs();
     }
 
     /**

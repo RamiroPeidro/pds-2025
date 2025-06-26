@@ -168,12 +168,42 @@ public class JugadorController {
      * Convierte Jugador a JugadorDTO
      */
     private JugadorDTO toDTO(Jugador jugador) {
+        // DEBUG: Logs para identificar el problema
+        log.debug("Converting player {} (ID: {}) to DTO", jugador.getNombre(), jugador.getId());
+        log.debug("String deporteFavorito: {}", jugador.getDeporteFavorito());
+        log.debug("JugadorDeportes collection is null: {}", jugador.getJugadorDeportes() == null);
+        
+        if (jugador.getJugadorDeportes() != null) {
+            log.debug("JugadorDeportes collection size: {}", jugador.getJugadorDeportes().size());
+            jugador.getJugadorDeportes().forEach(jd -> 
+                log.debug("Deporte from collection: {} (favorito: {})", 
+                    jd.getDeporte().getNombre(), jd.getEsFavorito())
+            );
+        }
+        
+        // Obtener lista de deportes favoritos REALES (es_favorito = true)
+        List<String> deportesFavoritos = jugador.getJugadorDeportes() != null 
+            ? jugador.getJugadorDeportes().stream()
+                .filter(jd -> jd.getEsFavorito()) // Solo los marcados como favoritos
+                .map(jd -> jd.getDeporte().getNombre())
+                .collect(Collectors.toList())
+            : List.of();
+        
+        // Si la lista está vacía pero tiene deporteFavorito String, agregarlo como fallback
+        if (deportesFavoritos.isEmpty() && jugador.getDeporteFavorito() != null) {
+            log.debug("Using fallback to String deporteFavorito: {}", jugador.getDeporteFavorito());
+            deportesFavoritos = List.of(jugador.getDeporteFavorito());
+        }
+        
+        log.debug("Final deportesFavoritos list: {}", deportesFavoritos);
+        
         return JugadorDTO.builder()
                 .id(jugador.getId())
                 .nombre(jugador.getNombre())
                 .email(jugador.getEmail())
                 .nivelDeJuego(jugador.getNivelDeJuego())
                 .deporteFavorito(jugador.getDeporteFavorito())
+                .deportesFavoritos(deportesFavoritos)
                 .ubicacion(jugador.getUbicacion())
                 .createdAt(jugador.getCreatedAt())
                 .build();
