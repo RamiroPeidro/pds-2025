@@ -1,7 +1,7 @@
 package com.pds.sportsmanager.model.dto;
 
 import com.pds.sportsmanager.model.entity.Ubicacion;
-import com.pds.sportsmanager.model.enums.NivelDeJugador;
+import com.pds.sportsmanager.model.enums.NivelDeJuego;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
@@ -11,7 +11,7 @@ public record UsuarioDTO(
     Long id,
     String nombreUsuario,
     String email,
-    NivelDeJugador nivelDeJugador,
+    NivelDeJuego nivelDeJuego,
     String deporteFavorito,
     Ubicacion ubicacion,
     LocalDateTime createdAt

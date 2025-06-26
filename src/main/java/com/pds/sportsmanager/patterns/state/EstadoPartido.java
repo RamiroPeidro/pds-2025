@@ -1,7 +1,7 @@
 package com.pds.sportsmanager.patterns.state;
 
 import com.pds.sportsmanager.model.entity.Partido;
-import com.pds.sportsmanager.model.entity.Usuario;
+import com.pds.sportsmanager.model.entity.Jugador;
 
 /**
  * Patrón State - Interfaz para los diferentes estados de un partido
@@ -21,7 +21,7 @@ public interface EstadoPartido {
     /**
      * Agrega un jugador al partido
      */
-    void agregarJugador(Partido partido, Usuario jugador);
+    void agregarJugador(Partido partido, Jugador jugador);
     
     /**
      * Confirma el partido

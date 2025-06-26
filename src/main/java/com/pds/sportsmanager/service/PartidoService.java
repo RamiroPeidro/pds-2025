@@ -1,8 +1,8 @@
 package com.pds.sportsmanager.service;
 
 import com.pds.sportsmanager.model.dto.PartidoBusquedaResult;
+import com.pds.sportsmanager.model.entity.Jugador;
 import com.pds.sportsmanager.model.entity.Partido;
-import com.pds.sportsmanager.model.entity.Usuario;
 import com.pds.sportsmanager.patterns.strategy.EstrategiaEmparejamiento;
 import com.pds.sportsmanager.repository.PartidoRepository;
 import org.slf4j.Logger;
@@ -60,7 +60,7 @@ public class PartidoService {
         logger.info("Agregando jugador {} al partido {}", jugadorId, partidoId);
         
         Partido partido = obtenerPartidoPorId(partidoId);
-        Usuario jugador = usuarioService.obtenerUsuarioPorId(jugadorId);
+        Jugador jugador = usuarioService.obtenerUsuarioPorId(jugadorId);
         
         // Usar el patrón State para agregar el jugador
         partido.agregarJugador(jugador);
@@ -128,16 +128,16 @@ public class PartidoService {
     public List<PartidoBusquedaResult> buscarPartidos(Long usuarioId, EstrategiaEmparejamiento estrategia) {
         logger.info("Buscando partidos para usuario {} con estrategia {}", usuarioId, estrategia.getNombre());
         
-        Usuario usuario = usuarioService.obtenerUsuarioPorId(usuarioId);
+        Jugador jugador = usuarioService.obtenerUsuarioPorId(usuarioId);
         List<Partido> partidosDisponibles = partidoRepository.findPartidosNecesitanJugadores(LocalDateTime.now());
         
         // Convertir a DTO con información de distancia
         List<PartidoBusquedaResult> partidosDTO = partidosDisponibles.stream()
-                .map(partido -> convertirAPartidoBusquedaResult(partido, usuario))
+                .map(partido -> convertirAPartidoBusquedaResult(partido, jugador))
                 .collect(Collectors.toList());
         
         // Aplicar la estrategia de búsqueda
-        List<PartidoBusquedaResult> resultados = estrategia.buscarPartidos(usuario, partidosDTO);
+        List<PartidoBusquedaResult> resultados = estrategia.buscarPartidos(jugador, partidosDTO);
         
         logger.info("Encontrados {} partidos compatibles", resultados.size());
         return resultados;
@@ -156,8 +156,8 @@ public class PartidoService {
      */
     @Transactional(readOnly = true)
     public List<Partido> obtenerPartidosDeUsuario(Long usuarioId) {
-        Usuario usuario = usuarioService.obtenerUsuarioPorId(usuarioId);
-        return partidoRepository.findByOwner(usuario);
+        Jugador jugador = usuarioService.obtenerUsuarioPorId(usuarioId);
+        return partidoRepository.findByOwner(jugador);
     }
 
     /**
@@ -226,11 +226,11 @@ public class PartidoService {
     /**
      * Convierte un Partido a PartidoBusquedaResult calculando la distancia
      */
-    private PartidoBusquedaResult convertirAPartidoBusquedaResult(Partido partido, Usuario usuario) {
+    private PartidoBusquedaResult convertirAPartidoBusquedaResult(Partido partido, Jugador jugador) {
         Double distancia = null;
         
-        if (usuario.getUbicacion() != null && partido.getUbicacion() != null) {
-            distancia = usuario.getUbicacion().calcularDistanciaKm(partido.getUbicacion());
+        if (jugador.getUbicacion() != null && partido.getUbicacion() != null) {
+            distancia = jugador.getUbicacion().calcularDistanciaKm(partido.getUbicacion());
         }
         
         return new PartidoBusquedaResult(
@@ -243,7 +243,7 @@ public class PartidoService {
                 partido.getFechaHora(),
                 partido.getDuracionMinutos(),
                 partido.getUbicacion(),
-                partido.getOwner().getNombreUsuario(),
+                partido.getOwner().getNombre(),
                 partido.getNivelMinimo(),
                 partido.getNivelMaximo(),
                 partido.getEstadoNombre(),

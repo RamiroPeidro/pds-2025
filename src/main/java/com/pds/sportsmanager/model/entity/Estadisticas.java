@@ -34,7 +34,7 @@ public class Estadisticas {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "jugador_id", nullable = false)
     @ToString.Exclude
-    private Usuario jugador;
+    private Jugador jugador;
 
     @PositiveOrZero(message = "Los puntos deben ser cero o positivos")
     @Column(nullable = false, columnDefinition = "integer default 0")
@@ -44,20 +44,16 @@ public class Estadisticas {
     @Column(nullable = false, columnDefinition = "integer default 0")
     private Integer faltas = 0;
 
-    @PositiveOrZero(message = "Las tarjetas amarillas deben ser cero o positivas")
+    @PositiveOrZero(message = "Las tarjetas deben ser cero o positivas")
     @Column(name = "tarjetas_amarillas", nullable = false, columnDefinition = "integer default 0")
-    private Integer tarjetasAmarillas = 0;
+    private Integer tarjetas = 0;
 
-    @PositiveOrZero(message = "Las tarjetas rojas deben ser cero o positivas")
-    @Column(name = "tarjetas_rojas", nullable = false, columnDefinition = "integer default 0")
-    private Integer tarjetasRojas = 0;
+    @Column(name = "comentarios", columnDefinition = "TEXT")
+    private String comentarios;
 
-    public Estadisticas(Partido partido, Usuario jugador) {
+
+    public Estadisticas(Partido partido, Jugador jugador) {
         this.partido = partido;
         this.jugador = jugador;
-        this.puntos = 0;
-        this.faltas = 0;
-        this.tarjetasAmarillas = 0;
-        this.tarjetasRojas = 0;
     }
 } 

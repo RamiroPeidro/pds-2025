@@ -1,6 +1,6 @@
 package com.pds.sportsmanager.model.entity;
 
-import com.pds.sportsmanager.model.enums.NivelDeJugador;
+import com.pds.sportsmanager.model.enums.NivelDeJuego;
 import com.pds.sportsmanager.patterns.state.EstadoPartido;
 import com.pds.sportsmanager.patterns.state.NecesitamosJugadores;
 import jakarta.persistence.*;
@@ -63,11 +63,11 @@ public class Partido {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "nivel_minimo")
-    private NivelDeJugador nivelMinimo;
+    private NivelDeJuego nivelMinimo;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "nivel_maximo")
-    private NivelDeJugador nivelMaximo;
+    private NivelDeJuego nivelMaximo;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "deporte_id", nullable = false)
@@ -77,7 +77,7 @@ public class Partido {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "owner_id", nullable = false)
     @ToString.Exclude  
-    private Usuario owner;
+    private Jugador owner;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -86,7 +86,7 @@ public class Partido {
         inverseJoinColumns = @JoinColumn(name = "jugador_id")
     )
     @ToString.Exclude  
-    private List<Usuario> jugadores = new ArrayList<>();
+    private List<Jugador> jugadores = new ArrayList<>();
 
     @OneToMany(mappedBy = "partido", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude  
@@ -110,7 +110,7 @@ public class Partido {
 
     public Partido(String titulo, LocalDateTime fechaHora, Integer duracionMinutos, 
                    Integer cantidadJugadoresRequeridos, Ubicacion ubicacion, 
-                   Deporte deporte, Usuario owner) {
+                   Deporte deporte, Jugador owner) {
         this.estado = new NecesitamosJugadores();
         this.estadoNombre = this.estado.getNombre();
         this.titulo = titulo;
@@ -151,7 +151,7 @@ public class Partido {
         this.estadoNombre = nuevoEstado.getNombre();
     }
 
-    public void agregarJugador(Usuario jugador) {
+    public void agregarJugador(Jugador jugador) {
         this.estado.agregarJugador(this, jugador);
     }
 
@@ -186,7 +186,7 @@ public class Partido {
         return Math.max(0, cantidadJugadoresRequeridos - jugadores.size());
     }
 
-    public boolean esNivelCompatible(NivelDeJugador nivel) {
+    public boolean esNivelCompatible(NivelDeJuego nivel) {
         if (nivelMinimo == null && nivelMaximo == null) {
             return true;
         }
@@ -197,5 +197,4 @@ public class Partido {
 
         return nivelMaximo == null || nivel.ordinal() <= nivelMaximo.ordinal();
     }
-
 }

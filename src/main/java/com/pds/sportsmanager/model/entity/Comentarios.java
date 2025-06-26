@@ -42,12 +42,12 @@ public class Comentarios {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "jugador_id", nullable = false)
     @ToString.Exclude
-    private Usuario jugador;
+    private Jugador jugador;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    public Comentarios(String contenido, Partido partido, Usuario jugador) {
+    public Comentarios(String contenido, Partido partido, Jugador jugador) {
         this.contenido = contenido;
         this.partido = partido;
         this.jugador = jugador;

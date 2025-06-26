@@ -1,8 +1,8 @@
 package com.pds.sportsmanager.repository;
 
+import com.pds.sportsmanager.model.entity.Jugador;
 import com.pds.sportsmanager.model.entity.Partido;
-import com.pds.sportsmanager.model.entity.Usuario;
-import com.pds.sportsmanager.model.enums.NivelDeJugador;
+import com.pds.sportsmanager.model.enums.NivelDeJuego;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -39,7 +39,7 @@ public interface PartidoRepository extends JpaRepository<Partido, Long> {
     /**
      * Busca partidos creados por un usuario
      */
-    List<Partido> findByOwner(Usuario owner);
+    List<Partido> findByOwner(Jugador owner);
     
     /**
      * Busca partidos donde participa un usuario
@@ -83,7 +83,7 @@ public interface PartidoRepository extends JpaRepository<Partido, Long> {
         )
         """)
     List<Partido> findPartidosCompatiblesConNivel(
-        @Param("nivel") NivelDeJugador nivel,
+        @Param("nivel") NivelDeJuego nivel,
         @Param("ahora") LocalDateTime ahora
     );
     

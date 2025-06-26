@@ -1,13 +1,13 @@
 package com.pds.sportsmanager.model.enums;
 
-public enum NivelDeJugador {
+public enum NivelDeJuego {
     PRINCIPIANTE("Principiante"),
     INTERMEDIO("Intermedio"),
     AVANZADO("Avanzado");
 
     private final String displayName;
 
-    NivelDeJugador(String displayName) {
+    NivelDeJuego(String displayName) {
         this.displayName = displayName;
     }
 
