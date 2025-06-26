@@ -16,7 +16,7 @@ public class PreferenciaNotificacionServiceImpl implements PreferenciaNotificaci
 
     @Override
     public Optional<PreferenciaNotificacion> obtenerPorUsuarioId(Long usuarioId) {
-        return repository.findByUsuarioId(usuarioId);
+        return repository.findByJugador_Id(usuarioId);
     }
 
     @Override

@@ -16,14 +16,14 @@ public interface PreferenciaNotificacionRepository extends JpaRepository<Prefere
      * @return las preferencias de notificación del usuario, si existen
      */
 
-    Optional<PreferenciaNotificacion> findByUsuarioId(Long usuarioId);
+    Optional<PreferenciaNotificacion> findByJugador_Id(Long usuarioId);
 
     /**
-     * Busca las preferencias de notificación por el email del usuario.
+     * Busca las preferencias de notificación por el email del jugador.
      *
-     * @param email el email del usuario
-     * @return las preferencias de notificación del usuario, si existen
+     * @param email el email del Jugador
+     * @return las preferencias de notificación del jugador, si existen
      */
-    @Query("SELECT p FROM PreferenciaNotificacion p JOIN p.usuario u WHERE u.email = :email")
+    @Query("SELECT p FROM PreferenciaNotificacion p JOIN p.jugador u WHERE u.email = :email")
     Optional<PreferenciaNotificacion> findByUsuarioEmail(String email);
 }
