@@ -1,8 +1,11 @@
 package com.pds.sportsmanager.service;
 
+import com.pds.sportsmanager.controller.PartidoController.PartidoInputDTO;
 import com.pds.sportsmanager.model.dto.PartidoBusquedaResult;
+import com.pds.sportsmanager.model.entity.Deporte;
 import com.pds.sportsmanager.model.entity.Jugador;
 import com.pds.sportsmanager.model.entity.Partido;
+import com.pds.sportsmanager.model.entity.Ubicacion;
 import com.pds.sportsmanager.patterns.strategy.EstrategiaEmparejamiento;
 import com.pds.sportsmanager.repository.PartidoRepository;
 import org.slf4j.Logger;
@@ -24,14 +27,53 @@ public class PartidoService {
     private final PartidoRepository partidoRepository;
     private final UsuarioService usuarioService;
     private final NotificacionService notificacionService;
+    private final DeporteService deporteService;
+    private final UbicacionService ubicacionService;
 
     @Autowired
     public PartidoService(PartidoRepository partidoRepository, 
                          UsuarioService usuarioService,
-                         NotificacionService notificacionService) {
+                         NotificacionService notificacionService,
+                         DeporteService deporteService,
+                         UbicacionService ubicacionService) {
         this.partidoRepository = partidoRepository;
         this.usuarioService = usuarioService;
         this.notificacionService = notificacionService;
+        this.deporteService = deporteService;
+        this.ubicacionService = ubicacionService;
+    }
+
+    /**
+     * Crea un nuevo partido desde DTO
+     */
+    public Partido crearPartidoFromDTO(PartidoInputDTO partidoDTO) {
+        logger.info("Creando nuevo partido desde DTO: {}", partidoDTO.titulo());
+        
+        // Obtener entidades relacionadas
+        Ubicacion ubicacion = ubicacionService.obtenerUbicacionPorId(partidoDTO.ubicacionId()).orElseThrow(
+            () -> new RuntimeException("Ubicación no encontrada con ID: " + partidoDTO.ubicacionId())
+        );
+        Deporte deporte = deporteService.obtenerDeportePorId(partidoDTO.deporteId()).orElseThrow(
+            () -> new RuntimeException("Deporte no encontrado con ID: " + partidoDTO.deporteId())
+        );
+        Jugador owner = usuarioService.obtenerUsuarioPorId(partidoDTO.ownerId());
+        
+        // Crear el partido
+        Partido partido = new Partido(
+            partidoDTO.titulo(),
+            partidoDTO.fechaHora(),
+            partidoDTO.duracionMinutos(),
+            partidoDTO.cantidadJugadoresRequeridos(),
+            ubicacion,
+            deporte,
+            owner
+        );
+        
+        partido.setDescripcion(partidoDTO.descripcion());
+        partido.setNivelMinimo(partidoDTO.nivelMinimo());
+        partido.setNivelMaximo(partidoDTO.nivelMaximo());
+        
+        return crearPartido(partido);
     }
 
     /**
@@ -148,7 +190,7 @@ public class PartidoService {
      */
     @Transactional(readOnly = true)
     public List<Partido> obtenerPartidosCercanos(Double latitud, Double longitud, Double radioKm) {
-        return partidoRepository.findPartidosCercanos(latitud, longitud, radioKm, LocalDateTime.now());
+        return partidoRepository.findPartidosCercanosWithRelations(latitud, longitud, radioKm, LocalDateTime.now());
     }
 
     /**
@@ -157,7 +199,7 @@ public class PartidoService {
     @Transactional(readOnly = true)
     public List<Partido> obtenerPartidosDeUsuario(Long usuarioId) {
         Jugador jugador = usuarioService.obtenerUsuarioPorId(usuarioId);
-        return partidoRepository.findByOwner(jugador);
+        return partidoRepository.findByOwnerWithRelations(jugador);
     }
 
     /**
@@ -165,7 +207,7 @@ public class PartidoService {
      */
     @Transactional(readOnly = true)
     public List<Partido> obtenerPartidosParticipando(Long usuarioId) {
-        return partidoRepository.findPartidosUsuarioParticipa(usuarioId);
+        return partidoRepository.findPartidosUsuarioParticipaWithRelations(usuarioId);
     }
 
     /**
@@ -194,8 +236,11 @@ public class PartidoService {
      */
     @Transactional(readOnly = true)
     public Partido obtenerPartidoPorId(Long id) {
-        return partidoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Partido no encontrado con ID: " + id));
+        Partido partido = partidoRepository.findByIdWithRelations(id);
+        if (partido == null) {
+            throw new RuntimeException("Partido no encontrado con ID: " + id);
+        }
+        return partido;
     }
 
     /**
@@ -203,7 +248,7 @@ public class PartidoService {
      */
     @Transactional(readOnly = true)
     public List<Partido> obtenerTodosLosPartidos() {
-        return partidoRepository.findAll();
+        return partidoRepository.findAllWithRelations();
     }
 
     /**

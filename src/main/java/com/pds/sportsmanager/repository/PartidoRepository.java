@@ -42,10 +42,38 @@ public interface PartidoRepository extends JpaRepository<Partido, Long> {
     List<Partido> findByOwner(Jugador owner);
     
     /**
+     * Busca partidos creados por un usuario con relaciones cargadas
+     */
+    @Query("""
+        SELECT DISTINCT p FROM Partido p 
+        LEFT JOIN FETCH p.ubicacion 
+        LEFT JOIN FETCH p.deporte 
+        LEFT JOIN FETCH p.owner 
+        LEFT JOIN FETCH p.jugadores
+        WHERE p.owner = :owner
+        ORDER BY p.fechaHora DESC
+        """)
+    List<Partido> findByOwnerWithRelations(@Param("owner") Jugador owner);
+    
+    /**
      * Busca partidos donde participa un usuario
      */
     @Query("SELECT p FROM Partido p JOIN p.jugadores j WHERE j.id = :usuarioId")
     List<Partido> findPartidosUsuarioParticipa(@Param("usuarioId") Long usuarioId);
+    
+    /**
+     * Busca partidos donde participa un usuario con relaciones cargadas
+     */
+    @Query("""
+        SELECT DISTINCT p FROM Partido p 
+        LEFT JOIN FETCH p.ubicacion 
+        LEFT JOIN FETCH p.deporte 
+        LEFT JOIN FETCH p.owner 
+        LEFT JOIN FETCH p.jugadores j
+        WHERE j.id = :usuarioId
+        ORDER BY p.fechaHora DESC
+        """)
+    List<Partido> findPartidosUsuarioParticipaWithRelations(@Param("usuarioId") Long usuarioId);
     
     /**
      * Busca partidos cercanos a una ubicación
@@ -61,6 +89,31 @@ public interface PartidoRepository extends JpaRepository<Partido, Long> {
              sin(radians(:latitud)) * sin(radians(p.ubicacion.latitud)))) <= :radioKm
         """)
     List<Partido> findPartidosCercanos(
+        @Param("latitud") Double latitud, 
+        @Param("longitud") Double longitud, 
+        @Param("radioKm") Double radioKm,
+        @Param("ahora") LocalDateTime ahora
+    );
+    
+    /**
+     * Busca partidos cercanos a una ubicación con relaciones cargadas
+     */
+    @Query("""
+        SELECT DISTINCT p FROM Partido p 
+        LEFT JOIN FETCH p.ubicacion 
+        LEFT JOIN FETCH p.deporte 
+        LEFT JOIN FETCH p.owner 
+        LEFT JOIN FETCH p.jugadores
+        WHERE p.estadoNombre = 'NECESITAMOS_JUGADORES' 
+        AND SIZE(p.jugadores) < p.cantidadJugadoresRequeridos
+        AND p.fechaHora > :ahora
+        AND p.ubicacion IS NOT NULL 
+        AND (6371 * acos(cos(radians(:latitud)) * cos(radians(p.ubicacion.latitud)) * 
+             cos(radians(p.ubicacion.longitud) - radians(:longitud)) + 
+             sin(radians(:latitud)) * sin(radians(p.ubicacion.latitud)))) <= :radioKm
+        ORDER BY p.fechaHora ASC
+        """)
+    List<Partido> findPartidosCercanosWithRelations(
         @Param("latitud") Double latitud, 
         @Param("longitud") Double longitud, 
         @Param("radioKm") Double radioKm,
@@ -122,4 +175,30 @@ public interface PartidoRepository extends JpaRepository<Partido, Long> {
         AND p.estadoNombre IN ('NECESITAMOS_JUGADORES', 'PARTIDO_ARMADO', 'PARTIDO_CONFIRMADO', 'EN_JUEGO')
         """)
     Long countPartidosActivosUsuario(@Param("usuarioId") Long usuarioId);
+    
+    /**
+     * Busca todos los partidos con relaciones cargadas
+     */
+    @Query("""
+        SELECT DISTINCT p FROM Partido p 
+        LEFT JOIN FETCH p.ubicacion 
+        LEFT JOIN FETCH p.deporte 
+        LEFT JOIN FETCH p.owner 
+        LEFT JOIN FETCH p.jugadores
+        ORDER BY p.fechaHora DESC
+        """)
+    List<Partido> findAllWithRelations();
+    
+    /**
+     * Busca partido por ID con relaciones cargadas
+     */
+    @Query("""
+        SELECT p FROM Partido p 
+        LEFT JOIN FETCH p.ubicacion 
+        LEFT JOIN FETCH p.deporte 
+        LEFT JOIN FETCH p.owner 
+        LEFT JOIN FETCH p.jugadores
+        WHERE p.id = :id
+        """)
+    Partido findByIdWithRelations(@Param("id") Long id);
 } 

@@ -2,6 +2,7 @@ package com.pds.sportsmanager.controller;
 
 import com.pds.sportsmanager.model.dto.PartidoBusquedaResult;
 import com.pds.sportsmanager.model.entity.Partido;
+import com.pds.sportsmanager.model.enums.NivelDeJuego;
 import com.pds.sportsmanager.patterns.strategy.EstrategiaEmparejamiento;
 import com.pds.sportsmanager.service.EstrategiaEmparejamientoFactory;
 import com.pds.sportsmanager.service.PartidoService;
@@ -9,13 +10,16 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/partidos")
@@ -27,14 +31,78 @@ public class PartidoController {
     private final PartidoService partidoService;
     private final EstrategiaEmparejamientoFactory estrategiaFactory;
 
+    // DTOs para evitar LazyInitializationException
+    @Builder
+    public static record PartidoInputDTO(
+        String titulo,
+        String descripcion,
+        LocalDateTime fechaHora,
+        Integer duracionMinutos,
+        Integer cantidadJugadoresRequeridos,
+        NivelDeJuego nivelMinimo,
+        NivelDeJuego nivelMaximo,
+        Long ubicacionId,
+        Long deporteId,
+        Long ownerId
+    ) {}
+
+    @Builder
+    public static record PartidoOutputDTO(
+        Long id,
+        String titulo,
+        String descripcion,
+        LocalDateTime fechaHora,
+        Integer duracionMinutos,
+        Integer cantidadJugadoresRequeridos,
+        NivelDeJuego nivelMinimo,
+        NivelDeJuego nivelMaximo,
+        String estadoNombre,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt,
+        
+        // Información básica de las relaciones (sin lazy loading)
+        Long ubicacionId,
+        String ubicacionDireccion,
+        Long deporteId,
+        String deporteNombre,
+        Long ownerId,
+        String ownerNombre,
+        Integer jugadoresActuales
+    ) {}
+
+    private PartidoOutputDTO toDTO(Partido partido) {
+        return PartidoOutputDTO.builder()
+            .id(partido.getId())
+            .titulo(partido.getTitulo())
+            .descripcion(partido.getDescripcion())
+            .fechaHora(partido.getFechaHora())
+            .duracionMinutos(partido.getDuracionMinutos())
+            .cantidadJugadoresRequeridos(partido.getCantidadJugadoresRequeridos())
+            .nivelMinimo(partido.getNivelMinimo())
+            .nivelMaximo(partido.getNivelMaximo())
+            .estadoNombre(partido.getEstadoNombre())
+            .createdAt(partido.getCreatedAt())
+            .updatedAt(partido.getUpdatedAt())
+            
+            // Información básica de relaciones (solo IDs y nombres principales)
+            .ubicacionId(partido.getUbicacion() != null ? partido.getUbicacion().getId() : null)
+            .ubicacionDireccion(partido.getUbicacion() != null ? partido.getUbicacion().getDireccion() : null)
+            .deporteId(partido.getDeporte() != null ? partido.getDeporte().getId() : null)
+            .deporteNombre(partido.getDeporte() != null ? partido.getDeporte().getNombre() : null)
+            .ownerId(partido.getOwner() != null ? partido.getOwner().getId() : null)
+            .ownerNombre(partido.getOwner() != null ? partido.getOwner().getNombre() : null)
+            .jugadoresActuales(partido.getJugadores() != null ? partido.getJugadores().size() : 0)
+            .build();
+    }
+
     @PostMapping
     @Operation(summary = "Crear un nuevo partido", description = "Crea un partido en estado 'Necesitamos Jugadores'")
-    public ResponseEntity<Partido> crearPartido(@Valid @RequestBody Partido partido) {
+    public ResponseEntity<PartidoOutputDTO> crearPartido(@Valid @RequestBody PartidoInputDTO partidoDTO) {
         log.info("REST: Creando nuevo partido");
         
         try {
-            Partido partidoCreado = partidoService.crearPartido(partido);
-            return ResponseEntity.status(HttpStatus.CREATED).body(partidoCreado);
+            Partido partido = partidoService.crearPartidoFromDTO(partidoDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(partido));
         } catch (IllegalArgumentException e) {
             log.warn("Error de validación al crear partido: {}", e.getMessage());
             return ResponseEntity.badRequest().build();
@@ -121,7 +189,7 @@ public class PartidoController {
 
     @GetMapping("/cercanos")
     @Operation(summary = "Buscar partidos cercanos", description = "Busca partidos en un radio específico")
-    public ResponseEntity<List<Partido>> buscarPartidosCercanos(
+    public ResponseEntity<List<PartidoOutputDTO>> buscarPartidosCercanos(
             @Parameter(description = "Latitud") @RequestParam Double latitud,
             @Parameter(description = "Longitud") @RequestParam Double longitud,
             @Parameter(description = "Radio en kilómetros") @RequestParam(defaultValue = "10.0") Double radioKm) {
@@ -129,17 +197,20 @@ public class PartidoController {
         log.info("REST: Buscando partidos cercanos a lat:{}, lng:{}, radio:{}km", latitud, longitud, radioKm);
         
         List<Partido> partidos = partidoService.obtenerPartidosCercanos(latitud, longitud, radioKm);
-        return ResponseEntity.ok(partidos);
+        List<PartidoOutputDTO> partidosDTO = partidos.stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(partidosDTO);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Obtener partido por ID", description = "Retorna un partido específico")
-    public ResponseEntity<Partido> obtenerPartido(@PathVariable Long id) {
+    public ResponseEntity<PartidoOutputDTO> obtenerPartido(@PathVariable Long id) {
         log.info("REST: Obteniendo partido {}", id);
         
         try {
             Partido partido = partidoService.obtenerPartidoPorId(id);
-            return ResponseEntity.ok(partido);
+            return ResponseEntity.ok(toDTO(partido));
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
@@ -147,21 +218,27 @@ public class PartidoController {
 
     @GetMapping
     @Operation(summary = "Listar todos los partidos", description = "Retorna todos los partidos")
-    public ResponseEntity<List<Partido>> listarPartidos() {
+    public ResponseEntity<List<PartidoOutputDTO>> listarPartidos() {
         log.info("REST: Listando todos los partidos");
         
         List<Partido> partidos = partidoService.obtenerTodosLosPartidos();
-        return ResponseEntity.ok(partidos);
+        List<PartidoOutputDTO> partidosDTO = partidos.stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(partidosDTO);
     }
 
     @GetMapping("/usuario/{usuarioId}/creados")
     @Operation(summary = "Partidos creados por usuario", description = "Retorna partidos creados por un usuario específico")
-    public ResponseEntity<List<Partido>> partidosCreados(@PathVariable Long usuarioId) {
+    public ResponseEntity<List<PartidoOutputDTO>> partidosCreados(@PathVariable Long usuarioId) {
         log.info("REST: Obteniendo partidos creados por usuario {}", usuarioId);
         
         try {
             List<Partido> partidos = partidoService.obtenerPartidosDeUsuario(usuarioId);
-            return ResponseEntity.ok(partidos);
+            List<PartidoOutputDTO> partidosDTO = partidos.stream()
+                    .map(this::toDTO)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(partidosDTO);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
@@ -169,10 +246,13 @@ public class PartidoController {
 
     @GetMapping("/usuario/{usuarioId}/participando")
     @Operation(summary = "Partidos donde participa usuario", description = "Retorna partidos donde participa un usuario específico")
-    public ResponseEntity<List<Partido>> partidosParticipando(@PathVariable Long usuarioId) {
+    public ResponseEntity<List<PartidoOutputDTO>> partidosParticipando(@PathVariable Long usuarioId) {
         log.info("REST: Obteniendo partidos donde participa usuario {}", usuarioId);
         
         List<Partido> partidos = partidoService.obtenerPartidosParticipando(usuarioId);
-        return ResponseEntity.ok(partidos);
+        List<PartidoOutputDTO> partidosDTO = partidos.stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(partidosDTO);
     }
 } 
