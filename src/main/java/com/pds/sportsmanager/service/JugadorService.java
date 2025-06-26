@@ -10,8 +10,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @Transactional
@@ -233,10 +236,27 @@ public class JugadorService {
         }
     }
 
+    /**
+     * Busca jugadores por deporte favorito (múltiples deportes + fallback)
+     * Combina tabla intermedia + campo String para máxima cobertura
+     */
     public List<Jugador> buscarJugadoresPorDeporte(Long deporteId) {
-        logger.info("Buscando jugadores por deporte: {}", deporteId);
-        List<Jugador> jug = jugadorRepository.findByDeporteFavorito(deporteId);
-        logger.info("Jugadores encontrados: {}", jug);
-        return jug;
+        logger.info("Buscando jugadores por deporte ID: {}", deporteId);
+        
+        // 1. Buscar en tabla intermedia (múltiples deportes)
+        List<Jugador> jugadoresMultiples = jugadorRepository.findByDeporteFavorito(deporteId);
+        
+        // 2. Buscar en campo String (fallback para jugadores sin tabla intermedia)
+        List<Jugador> jugadoresString = jugadorRepository.findByDeporteFavoritoString(deporteId);
+        
+        // 3. Combinar y eliminar duplicados usando Set
+        Set<Jugador> jugadoresUnicos = new HashSet<>(jugadoresMultiples);
+        jugadoresUnicos.addAll(jugadoresString);
+        
+        List<Jugador> resultado = new ArrayList<>(jugadoresUnicos);
+        logger.info("Encontrados {} jugadores para deporte ID {}: {} con múltiples deportes, {} por String", 
+                   resultado.size(), deporteId, jugadoresMultiples.size(), jugadoresString.size());
+        
+        return resultado;
     }
 } 

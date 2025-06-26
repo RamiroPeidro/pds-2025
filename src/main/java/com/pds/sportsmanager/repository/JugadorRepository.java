@@ -39,10 +39,17 @@ public interface JugadorRepository extends JpaRepository<Jugador, Long> {
     List<Jugador> findByNivelDeJuego(NivelDeJuego nivel);
     
     /**
-     * Busca jugadores por deportes favoritos (usando String deporteFavorito)
+     * Busca jugadores por deportes favoritos (usando tabla intermedia)
+     * Permite múltiples deportes por jugador
+     */
+    @Query("SELECT DISTINCT j FROM Jugador j JOIN j.deportesFavs d WHERE d.id = :deporteId")
+    List<Jugador> findByDeporteFavorito(@Param("deporteId") Long deporteId);
+    
+    /**
+     * Busca jugadores por deporte favorito principal (String - fallback)
      */
     @Query("SELECT j FROM Jugador j JOIN Deporte d ON j.deporteFavorito = d.nombre WHERE d.id = :deporteId")
-    List<Jugador> findByDeporteFavorito(@Param("deporteId") Long deporteId);
+    List<Jugador> findByDeporteFavoritoString(@Param("deporteId") Long deporteId);
     
     /**
      * Busca jugadores cercanos a una ubicación específica
