@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface UsuarioRepository extends JpaRepository<Jugador, Long> {
+public interface JugadorRepository extends JpaRepository<Jugador, Long> {
     
     /**
      * Busca un jugador por nombre
@@ -34,35 +34,35 @@ public interface UsuarioRepository extends JpaRepository<Jugador, Long> {
     boolean existsByEmail(String email);
     
     /**
-     * Busca usuarios por nivel de juego
+     * Busca jugadores por nivel de juego
      */
     List<Jugador> findByNivelDeJuego(NivelDeJuego nivel);
     
     /**
-     * Busca usuarios por deportes favoritos
+     * Busca jugadores por deportes favoritos
      */
-    @Query("SELECT u FROM Jugador u JOIN u.deportesFavs d WHERE d.id = :deporteId")
+    @Query("SELECT j FROM Jugador j JOIN j.deportesFavs d WHERE d.id = :deporteId")
     List<Jugador> findByDeporteFavorito(@Param("deporteId") Long deporteId);
     
     /**
-     * Busca usuarios cercanos a una ubicación específica
+     * Busca jugadores cercanos a una ubicación específica
      */
     @Query("""
-        SELECT u FROM Jugador u 
-        WHERE u.ubicacion IS NOT NULL 
-        AND (6371 * acos(cos(radians(:latitud)) * cos(radians(u.ubicacion.latitud)) * 
-             cos(radians(u.ubicacion.longitud) - radians(:longitud)) + 
-             sin(radians(:latitud)) * sin(radians(u.ubicacion.latitud)))) <= :radioKm
+        SELECT j FROM Jugador j 
+        WHERE j.ubicacion IS NOT NULL 
+        AND (6371 * acos(cos(radians(:latitud)) * cos(radians(j.ubicacion.latitud)) * 
+             cos(radians(j.ubicacion.longitud) - radians(:longitud)) + 
+             sin(radians(:latitud)) * sin(radians(j.ubicacion.latitud)))) <= :radioKm
         """)
-    List<Jugador> findUsuariosCercanos(
+    List<Jugador> findJugadoresCercanos(
         @Param("latitud") Double latitud, 
         @Param("longitud") Double longitud, 
         @Param("radioKm") Double radioKm
     );
     
     /**
-     * Busca usuarios activos (que han creado al menos un partido)
+     * Busca jugadores activos (que han creado al menos un partido)
      */
-    @Query("SELECT DISTINCT u FROM Jugador u WHERE SIZE(u.partidosOrganizados) > 0")
-    List<Jugador> findUsuariosActivos();
+    @Query("SELECT DISTINCT j FROM Jugador j WHERE SIZE(j.partidosOrganizados) > 0")
+    List<Jugador> findJugadoresActivos();
 } 

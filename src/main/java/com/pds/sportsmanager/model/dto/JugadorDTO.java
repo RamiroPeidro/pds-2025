@@ -7,9 +7,9 @@ import lombok.Builder;
 import java.time.LocalDateTime;
 
 @Builder
-public record UsuarioDTO(
+public record JugadorDTO(
     Long id,
-    String nombreUsuario,
+    String nombre,
     String email,
     NivelDeJuego nivelDeJuego,
     String deporteFavorito,
