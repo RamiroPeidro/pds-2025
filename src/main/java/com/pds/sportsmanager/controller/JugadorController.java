@@ -4,6 +4,7 @@ import com.pds.sportsmanager.model.dto.JugadorDTO;
 import com.pds.sportsmanager.model.dto.JugadorRequestDTO;
 import com.pds.sportsmanager.model.entity.Jugador;
 import com.pds.sportsmanager.service.JugadorService;
+import com.pds.sportsmanager.utils.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -11,9 +12,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -25,19 +29,46 @@ import java.util.stream.Collectors;
 public class JugadorController {
 
     private final JugadorService jugadorService;
+    private final JwtUtil jwtUtil;
+    private final AuthenticationManager authManager;
 
-    @PostMapping
-    @Operation(summary = "Registrar jugador", description = "Registra un nuevo jugador en el sistema")
-    public ResponseEntity<JugadorDTO> registrarJugador(@Valid @RequestBody JugadorRequestDTO jugadorRequest) {
-        log.info("REST: Registrando nuevo jugador: {}", jugadorRequest.nombre());
-        
+    @PostMapping("/registrar")
+    @Operation(summary = "Registrar jugador y devolver JWT", description = "Registra un nuevo jugador y devuelve token JWT en JSON")
+    public ResponseEntity<Map<String, String>> registrarJugador(@Valid @RequestBody JugadorRequestDTO dto) {
+        log.info("REST: Registrando nuevo jugador: {}", dto.nombre());
         try {
-            Jugador jugador = fromRequestDTO(jugadorRequest);
-            Jugador jugadorGuardado = jugadorService.registrarJugador(jugador);
-            return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(jugadorGuardado));
+            Jugador j = fromRequestDTO(dto);
+            Jugador guardado = jugadorService.registrarJugador(j);
+            String token = jwtUtil.generateToken(guardado.getEmail());
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(Map.of("token", token));
         } catch (IllegalArgumentException e) {
             log.warn("Error validando jugador: {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity
+                    .badRequest()
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+
+    @PostMapping("/iniciar-sesion")
+    @Operation(summary = "Iniciar sesión", description = "Autentica con email y contraseña y devuelve token JWT")
+    public ResponseEntity<Map<String,String>> iniciarSesion(
+            @RequestBody Map<String, String> credenciales) {
+        String email = credenciales.get("email");
+        String pass  = credenciales.get("contrasenia");
+        try {
+            authManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(email, pass)
+            );
+            String token = jwtUtil.generateToken(email);
+            return ResponseEntity.ok(Map.of("token", token));
+        } catch (Exception e) {
+            log.warn("Falló autenticación para {}: {}", email, e.getMessage());
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Credenciales inválidas"));
         }
     }
 
