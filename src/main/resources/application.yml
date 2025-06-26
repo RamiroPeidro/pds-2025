@@ -80,6 +80,11 @@ supabase:
   anon-key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2dG1kanlsaXVxcW9vdXF6aHBvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3MDUwMzYsImV4cCI6MjA2NTI4MTAzNn0.LKY_VXH04mmf24nnsJQUFJw3w95udswO953ZkgbSJQM
 
 app:
+  jwt:
+    # 32 bytes base64 para HS256
+    secret: ${APP_JWT_SECRET:C9SxDf9tcg7hDio9uS9pTiZcxVhNwt0IzSDov6KmD08=}
+    # 1 h
+    expiration-ms: ${APP_JWT_EXPIRATION_MS:3600000}
   firebase:
     service-account-key: classpath:${FIREBASE_SERVICE_ACCOUNT_KEY:}
   notification:
