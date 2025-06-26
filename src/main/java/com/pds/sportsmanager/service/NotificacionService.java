@@ -1,8 +1,8 @@
 package com.pds.sportsmanager.service;
 
+import com.pds.sportsmanager.model.entity.Jugador;
 import com.pds.sportsmanager.model.entity.Partido;
 import com.pds.sportsmanager.model.entity.PreferenciaNotificacion;
-import com.pds.sportsmanager.model.entity.Usuario;
 import com.pds.sportsmanager.model.enums.TipoNotificacion;
 import com.pds.sportsmanager.patterns.observer.NotificacionEvent;
 import com.pds.sportsmanager.patterns.observer.Notificador;
@@ -250,7 +250,7 @@ public class NotificacionService {
      */
     private List<String> obtenerEmailsJugadores(Partido partido) {
         return partido.getJugadores().stream()
-                .map(Usuario::getEmail)
+                .map(Jugador::getEmail)
                 .collect(Collectors.toList());
     }
 
