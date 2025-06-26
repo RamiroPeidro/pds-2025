@@ -55,17 +55,12 @@ public class Jugador {
 
     @Column(name = "deporte_favorito")
     private String deporteFavorito; // Campo texto simple según DB
-    
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "jugador_deporte",
-            joinColumns = @JoinColumn(name = "jugador_id"),
-            inverseJoinColumns = @JoinColumn(name = "deporte_id")
-    )
-    @ToString.Exclude
-    private List<Deporte> deportesFavs = new ArrayList<>(); // Lista de deportes según diagrama
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "jugador", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private List<JugadorDeporte> jugadorDeportes = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ubicacion_id")
     private Ubicacion ubicacion;
 
@@ -82,6 +77,9 @@ public class Jugador {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @OneToOne(mappedBy = "jugador", cascade = CascadeType.ALL, orphanRemoval = true)
+    private PreferenciaNotificacion preferenciaNotificacion;
 
     // Agrega un nuevo partido organizado por este jugador
     public void crearPartido(Partido partido) {
@@ -118,10 +116,32 @@ public class Jugador {
     }
 
     // Agrega un deporte favorito si no está en la lista (según diagrama UML)
-    public void agregarDeporte(Deporte favorito) {
-        if (!deportesFavs.contains(favorito)) {
-            deportesFavs.add(favorito);
+    public void agregarDeporte(Deporte deporte, NivelDeJuego nivel, boolean esFavorito) {
+        JugadorDeporte jugadorDeporte = JugadorDeporte.builder()
+                .jugador(this)
+                .deporte(deporte)
+                .nivel(nivel)
+                .esFavorito(esFavorito)
+                .build();
+        
+        if (!jugadorDeportes.contains(jugadorDeporte)) {
+            jugadorDeportes.add(jugadorDeporte);
         }
+    }
+
+    // ✅ ACTUALIZAR: Método para obtener deportes favoritos reales
+    public List<Deporte> getDeportesFavoritos() {
+        return jugadorDeportes.stream()
+                .filter(JugadorDeporte::getEsFavorito)
+                .map(JugadorDeporte::getDeporte)
+                .toList();
+    }
+
+    // ✅ ACTUALIZAR: Método para obtener todos los deportes asociados
+    public List<Deporte> getTodosLosDeportes() {
+        return jugadorDeportes.stream()
+                .map(JugadorDeporte::getDeporte)
+                .toList();
     }
 
 }

@@ -1,11 +1,15 @@
 package com.pds.sportsmanager.patterns.observer;
 
+// import com.google.firebase.messaging.FirebaseMessaging;
+// import com.google.firebase.messaging.FirebaseMessagingException;
+// import com.google.firebase.messaging.Message;
+// import com.google.firebase.messaging.Notification;
+import com.pds.sportsmanager.model.entity.PreferenciaNotificacion;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import java.time.format.DateTimeFormatter;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -18,19 +22,13 @@ import java.util.concurrent.CompletableFuture;
 @ConditionalOnProperty(name = "notificaciones.firebase.habilitado", havingValue = "true", matchIfMissing = true)
 public class NotificadorFirebase implements Notificador {
 
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-    
-   //TODO: Inyectar FirebaseMessaging
+    // Inyectar FirebaseMessaging
 
     @Override
-    public void notificar(NotificacionEvent evento) {
-        if (!estaHabilitado()) {
-            log.debug("Notificador Firebase deshabilitado, saltando envío");
-            return;
-        }
+    public void notificar(EventSingle evento) {
 
-        log.info("Enviando notificación push: {} a {} dispositivos", 
-                evento.tipo(), evento.destinatarios().size());
+        log.info("Enviando notificación push: {} a {} dispositivo",
+                evento.tipo(), evento.destinatario());
 
         CompletableFuture.runAsync(() -> {
             try {
@@ -47,33 +45,38 @@ public class NotificadorFirebase implements Notificador {
     }
 
     @Override
-    public boolean estaHabilitado() {
-        //TODO: Verificar configuración Firebase, tokens, etc.
+    public boolean estaHabilitado(PreferenciaNotificacion preferencia) {
+        //Verificar configuración Firebase, tokens, etc.
+        if (preferencia == null || !preferencia.estaHabilitadaPush()) {
+            log.debug("Preferencias de notificación deshabilitadas o no encontradas");
+            return false;
+        }
         return true;
     }
 
     /**
-     * TODO: Enviar notificaciones push usando Firebase Admin SDK
+     * Enviar notificaciones push usando Firebase Admin SDK
      */
-    private void enviarNotificacionesAsincrono(NotificacionEvent evento) {
+    private void enviarNotificacionesAsincrono(EventSingle evento) {
         var notificacionData = crearNotificacionData(evento);
+        log.debug("Datos de notificación creados: {}", notificacionData);
 
-        for (String token : evento.destinatarios()) {
+//        for (String emails : evento.destinatarios()) {
             try {
-                enviarNotificacionIndividual(token, notificacionData);
-                log.debug("Push notification enviada exitosamente a token: {}***", 
-                         token.substring(0, Math.min(10, token.length())));
+                enviarNotificacionIndividual(evento.destinatario(), notificacionData);
+                log.debug("Push notification enviada exitosamente a token: {}***",
+                        evento.destinatario());
             } catch (Exception e) {
-                log.error("Error enviando push notification a token {}: {}", 
-                         token.substring(0, Math.min(10, token.length())), e.getMessage());
+                log.error("Error enviando push notification a token {}: {}",
+                        evento.destinatario());
             }
-        }
+//        }
     }
 
     /**
      * Crea los datos de la notificación usando records
      */
-    private NotificacionData crearNotificacionData(NotificacionEvent evento) {
+    private NotificacionData crearNotificacionData(EventSingle evento) {
         String titulo = generarTitulo(evento);
         String cuerpo = evento.mensaje();
         String icono = generarIcono(evento);
@@ -96,7 +99,7 @@ public class NotificadorFirebase implements Notificador {
     /**
      * Genera el título usando switch expressions
      */
-    private String generarTitulo(NotificacionEvent evento) {
+    private String generarTitulo(EventSingle evento) {
         return switch (evento.tipo()) {
             case PARTIDO_CREADO -> "🏆 Nuevo Partido Disponible";
             case PARTIDO_ARMADO -> "✅ Partido Armado";
@@ -112,7 +115,7 @@ public class NotificadorFirebase implements Notificador {
     /**
      * Genera el icono de la notificación
      */
-    private String generarIcono(NotificacionEvent evento) {
+    private String generarIcono(EventSingle evento) {
         return switch (evento.tipo()) {
             case PARTIDO_CREADO, JUGADOR_UNIDO -> "ic_partido_nuevo";
             case PARTIDO_ARMADO, PARTIDO_CONFIRMADO -> "ic_partido_confirmado";
@@ -125,7 +128,7 @@ public class NotificadorFirebase implements Notificador {
     /**
      * Genera el sonido de la notificación
      */
-    private String generarSonido(NotificacionEvent evento) {
+    private String generarSonido(EventSingle evento) {
         return switch (evento.tipo()) {
             case PARTIDO_CREADO, JUGADOR_UNIDO -> "notification_success";
             case PARTIDO_ARMADO, PARTIDO_CONFIRMADO -> "notification_important";
@@ -136,26 +139,11 @@ public class NotificadorFirebase implements Notificador {
     }
 
     /**
-     * Simula el envío de notificación push individual
-     * En un proyecto real usarías Firebase Admin SDK
+     * Envia una notificación individual a un token FCM (simulado)
      */
     private void enviarNotificacionIndividual(String token, NotificacionData data) {
-        // Simulación del envío
-        log.info("🔔 PUSH ENVIADO - Token: {}*** | Título: {} | Partido: {}", 
-                token.substring(0, Math.min(8, token.length())), 
-                data.titulo(), 
-                data.partidoId());
-        
-        //TODO: Enviar notificaciones push usando Firebase Admin SDK
+        // Simulación: solo loguea en consola
+        log.info("[SIMULADO] Notificación enviada por Firebase a token: {} | Título: {} | Cuerpo: {}",
+                token, data.titulo(), data.cuerpo());
     }
-
-    /**
-     * Método de utilidad para validar tokens FCM
-     */
-    private boolean esTokenValido(String token) {
-        // Validación básica de formato de token FCM
-        return token != null && 
-               token.length() > 100 &&  
-               token.matches("^[a-zA-Z0-9_:-]+$");
-    }
-} 
+}

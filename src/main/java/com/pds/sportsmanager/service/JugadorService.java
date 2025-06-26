@@ -3,6 +3,7 @@ package com.pds.sportsmanager.service;
 import com.pds.sportsmanager.model.entity.Deporte;
 import com.pds.sportsmanager.model.entity.Jugador;
 import com.pds.sportsmanager.model.entity.Partido;
+import com.pds.sportsmanager.model.entity.JugadorDeporte;
 import com.pds.sportsmanager.repository.JugadorRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,8 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.pds.sportsmanager.repository.PartidoRepository;
 import com.pds.sportsmanager.repository.DeporteRepository;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @Transactional
@@ -35,10 +39,18 @@ public class JugadorService {
             DeporteRepository deporteRepository,
             PasswordEncoder passwordEncoder
     ) {
+    private final JugadorDeporteService jugadorDeporteService;
+    private final PreferenciaNotificacionService preferenciaNotificacionService;
+
+
+    @Autowired
+    public JugadorService(JugadorRepository jugadorRepository, PasswordEncoder passwordEncoder, JugadorDeporteService jugadorDeporteService, PreferenciaNotificacionService preferenciaNotificacionService) {
         this.jugadorRepository = jugadorRepository;
         this.partidoRepository = partidoRepository;
         this.deporteRepository = deporteRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jugadorDeporteService = jugadorDeporteService;
+        this.preferenciaNotificacionService = preferenciaNotificacionService;
     }
 
 
@@ -53,9 +65,12 @@ public class JugadorService {
         
         // Encriptar contraseña
         jugador.setContrasenia(passwordEncoder.encode(jugador.getContrasenia()));
-        
+
         // Guardar jugador
         Jugador jugadorGuardado = jugadorRepository.save(jugador);
+
+        // Registrar deportes asociados
+
         
         logger.info("Jugador registrado exitosamente con ID: {}", jugadorGuardado.getId());
         return jugadorGuardado;
@@ -120,36 +135,36 @@ public class JugadorService {
     }
 
     /**
-     * Busca un jugador por nombre
+     * Busca un jugador por nombre con deportes favoritos cargados
      */
     @Transactional(readOnly = true)
     public Optional<Jugador> buscarPorNombre(String nombre) {
-        return jugadorRepository.findByNombre(nombre);
+        return jugadorRepository.findByNombreWithDeportesFavs(nombre);
     }
 
     /**
-     * Busca un jugador por email
+     * Busca un jugador por email con deportes favoritos cargados
      */
     @Transactional(readOnly = true)
     public Optional<Jugador> buscarPorEmail(String email) {
-        return jugadorRepository.findByEmail(email);
+        return jugadorRepository.findByEmailWithDeportesFavs(email);
     }
 
     /**
-     * Obtiene un jugador por ID
+     * Obtiene un jugador por ID con sus deportes favoritos cargados
      */
     @Transactional(readOnly = true)
     public Jugador obtenerJugadorPorId(Long id) {
-        return jugadorRepository.findById(id)
+        return jugadorRepository.findByIdWithDeportesFavs(id)
                 .orElseThrow(() -> new RuntimeException("Jugador no encontrado con ID: " + id));
     }
 
     /**
-     * Obtiene todos los jugadores
+     * Obtiene todos los jugadores con sus deportes favoritos cargados
      */
     @Transactional(readOnly = true)
     public List<Jugador> obtenerTodosLosJugadores() {
-        return jugadorRepository.findAll();
+        return jugadorRepository.findAllWithDeportesFavs();
     }
 
     /**
@@ -272,5 +287,28 @@ public class JugadorService {
         Jugador jugador = obtenerJugadorPorId(jugadorId);
         jugador.establecerDeporteFavorito(nombreDeporte);
         jugadorRepository.save(jugador);
+
+    /**
+     * Busca jugadores por deporte favorito (múltiples deportes + fallback)
+     * Combina tabla intermedia + campo String para máxima cobertura
+     */
+    public List<Jugador> buscarJugadoresPorDeporte(Long deporteId) {
+        logger.info("Buscando jugadores por deporte ID: {}", deporteId);
+        
+        // 1. Buscar en tabla intermedia (múltiples deportes)
+        List<Jugador> jugadoresMultiples = jugadorRepository.findByDeporteFavorito(deporteId);
+        
+        // 2. Buscar en campo String (fallback para jugadores sin tabla intermedia)
+        List<Jugador> jugadoresString = jugadorRepository.findByDeporteFavoritoString(deporteId);
+        
+        // 3. Combinar y eliminar duplicados usando Set
+        Set<Jugador> jugadoresUnicos = new HashSet<>(jugadoresMultiples);
+        jugadoresUnicos.addAll(jugadoresString);
+        
+        List<Jugador> resultado = new ArrayList<>(jugadoresUnicos);
+        logger.info("Encontrados {} jugadores para deporte ID {}: {} con múltiples deportes, {} por String", 
+                   resultado.size(), deporteId, jugadoresMultiples.size(), jugadoresString.size());
+        
+        return resultado;
     }
 } 

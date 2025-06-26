@@ -27,4 +27,5 @@ public class JavaMailEmailAdapter implements EmailAdapter {
             throw new RuntimeException("Error enviando email", e);
         }
     }
+
 }

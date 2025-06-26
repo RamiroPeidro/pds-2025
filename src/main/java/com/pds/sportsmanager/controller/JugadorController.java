@@ -5,6 +5,7 @@ import com.pds.sportsmanager.model.dto.JugadorRequestDTO;
 import com.pds.sportsmanager.model.entity.Jugador;
 import com.pds.sportsmanager.model.entity.Partido;
 import com.pds.sportsmanager.service.JugadorService;
+import com.pds.sportsmanager.utils.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -12,9 +13,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -26,19 +30,46 @@ import java.util.stream.Collectors;
 public class JugadorController {
 
     private final JugadorService jugadorService;
+    private final JwtUtil jwtUtil;
+    private final AuthenticationManager authManager;
 
-    @PostMapping
-    @Operation(summary = "Registrar jugador", description = "Registra un nuevo jugador en el sistema")
-    public ResponseEntity<JugadorDTO> registrarJugador(@Valid @RequestBody JugadorRequestDTO jugadorRequest) {
-        log.info("REST: Registrando nuevo jugador: {}", jugadorRequest.nombre());
-        
+    @PostMapping("/registrar")
+    @Operation(summary = "Registrar jugador y devolver JWT", description = "Registra un nuevo jugador y devuelve token JWT en JSON")
+    public ResponseEntity<Map<String, String>> registrarJugador(@Valid @RequestBody JugadorRequestDTO dto) {
+        log.info("REST: Registrando nuevo jugador: {}", dto.nombre());
         try {
-            Jugador jugador = fromRequestDTO(jugadorRequest);
-            Jugador jugadorGuardado = jugadorService.registrarJugador(jugador);
-            return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(jugadorGuardado));
+            Jugador j = fromRequestDTO(dto);
+            Jugador guardado = jugadorService.registrarJugador(j);
+            String token = jwtUtil.generateToken(guardado.getEmail());
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(Map.of("token", token));
         } catch (IllegalArgumentException e) {
             log.warn("Error validando jugador: {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity
+                    .badRequest()
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+
+    @PostMapping("/iniciar-sesion")
+    @Operation(summary = "Iniciar sesión", description = "Autentica con email y contraseña y devuelve token JWT")
+    public ResponseEntity<Map<String,String>> iniciarSesion(
+            @RequestBody Map<String, String> credenciales) {
+        String email = credenciales.get("email");
+        String pass  = credenciales.get("contrasenia");
+        try {
+            authManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(email, pass)
+            );
+            String token = jwtUtil.generateToken(email);
+            return ResponseEntity.ok(Map.of("token", token));
+        } catch (Exception e) {
+            log.warn("Falló autenticación para {}: {}", email, e.getMessage());
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Credenciales inválidas"));
         }
     }
 
@@ -169,12 +200,42 @@ public class JugadorController {
      * Convierte Jugador a JugadorDTO
      */
     private JugadorDTO toDTO(Jugador jugador) {
+        // DEBUG: Logs para identificar el problema
+        log.debug("Converting player {} (ID: {}) to DTO", jugador.getNombre(), jugador.getId());
+        log.debug("String deporteFavorito: {}", jugador.getDeporteFavorito());
+        log.debug("JugadorDeportes collection is null: {}", jugador.getJugadorDeportes() == null);
+        
+        if (jugador.getJugadorDeportes() != null) {
+            log.debug("JugadorDeportes collection size: {}", jugador.getJugadorDeportes().size());
+            jugador.getJugadorDeportes().forEach(jd -> 
+                log.debug("Deporte from collection: {} (favorito: {})", 
+                    jd.getDeporte().getNombre(), jd.getEsFavorito())
+            );
+        }
+        
+        // Obtener lista de deportes favoritos REALES (es_favorito = true)
+        List<String> deportesFavoritos = jugador.getJugadorDeportes() != null 
+            ? jugador.getJugadorDeportes().stream()
+                .filter(jd -> jd.getEsFavorito()) // Solo los marcados como favoritos
+                .map(jd -> jd.getDeporte().getNombre())
+                .collect(Collectors.toList())
+            : List.of();
+        
+        // Si la lista está vacía pero tiene deporteFavorito String, agregarlo como fallback
+        if (deportesFavoritos.isEmpty() && jugador.getDeporteFavorito() != null) {
+            log.debug("Using fallback to String deporteFavorito: {}", jugador.getDeporteFavorito());
+            deportesFavoritos = List.of(jugador.getDeporteFavorito());
+        }
+        
+        log.debug("Final deportesFavoritos list: {}", deportesFavoritos);
+        
         return JugadorDTO.builder()
                 .id(jugador.getId())
                 .nombre(jugador.getNombre())
                 .email(jugador.getEmail())
                 .nivelDeJuego(jugador.getNivelDeJuego())
                 .deporteFavorito(jugador.getDeporteFavorito())
+                .deportesFavoritos(deportesFavoritos)
                 .ubicacion(jugador.getUbicacion())
                 .createdAt(jugador.getCreatedAt())
                 .build();
