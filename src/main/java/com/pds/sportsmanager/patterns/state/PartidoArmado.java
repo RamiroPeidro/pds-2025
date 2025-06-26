@@ -1,7 +1,7 @@
 package com.pds.sportsmanager.patterns.state;
 
 import com.pds.sportsmanager.model.entity.Partido;
-import com.pds.sportsmanager.model.entity.Usuario;
+import com.pds.sportsmanager.model.entity.Jugador;
 
 /**
  * Estado cuando el partido tiene suficientes jugadores pero aún no está confirmado
@@ -19,7 +19,7 @@ public class PartidoArmado implements EstadoPartido {
     }
 
     @Override
-    public void agregarJugador(Partido partido, Usuario jugador) {
+    public void agregarJugador(Partido partido, Jugador jugador) {
         throw new IllegalStateException("El partido ya tiene suficientes jugadores");
     }
 

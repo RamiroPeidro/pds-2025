@@ -1,7 +1,7 @@
 package com.pds.sportsmanager.model.dto;
 
 import com.pds.sportsmanager.model.entity.Ubicacion;
-import com.pds.sportsmanager.model.enums.NivelDeJugador;
+import com.pds.sportsmanager.model.enums.NivelDeJuego;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -20,7 +20,7 @@ public record UsuarioRequestDTO(
     @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
     String contrasenia,
     
-    NivelDeJugador nivelDeJugador,
+    NivelDeJuego nivelDeJuego,
     
     Long deporteFavoritoId,
     

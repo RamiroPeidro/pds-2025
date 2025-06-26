@@ -1,7 +1,7 @@
 package com.pds.sportsmanager.model.dto;
 
 import com.pds.sportsmanager.model.entity.Ubicacion;
-import com.pds.sportsmanager.model.enums.NivelDeJugador;
+import com.pds.sportsmanager.model.enums.NivelDeJuego;
 import lombok.Builder;
 import jakarta.validation.constraints.*;
 
@@ -31,10 +31,10 @@ public record PartidoCreacionDTO(
     Long deporteId,
     
     @NotNull(message = "El nivel mínimo es obligatorio")
-    NivelDeJugador nivelMinimo,
+    NivelDeJuego nivelMinimo,
     
     @NotNull(message = "El nivel máximo es obligatorio")
-    NivelDeJugador nivelMaximo,
+    NivelDeJuego nivelMaximo,
     
     @Min(value = 2, message = "Mínimo 2 jugadores")
     @Max(value = 22, message = "Máximo 22 jugadores")
@@ -57,8 +57,8 @@ public record PartidoCreacionDTO(
     
     public static PartidoCreacionDTOBuilder futbolBuilder() {
         return PartidoCreacionDTO.builder()
-            .nivelMinimo(NivelDeJugador.PRINCIPIANTE)
-            .nivelMaximo(NivelDeJugador.AVANZADO)
+            .nivelMinimo(NivelDeJuego.PRINCIPIANTE)
+            .nivelMaximo(NivelDeJuego.AVANZADO)
             .maxJugadores(10)
             .requiereConfirmacion(true)  
             .esPrivado(false);           
@@ -69,8 +69,8 @@ public record PartidoCreacionDTO(
      */
     public static PartidoCreacionDTOBuilder tenisBuilder() {
         return PartidoCreacionDTO.builder()
-            .nivelMinimo(NivelDeJugador.PRINCIPIANTE)
-            .nivelMaximo(NivelDeJugador.AVANZADO)
+            .nivelMinimo(NivelDeJuego.PRINCIPIANTE)
+            .nivelMaximo(NivelDeJuego.AVANZADO)
             .maxJugadores(2)
             .requiereConfirmacion(false)
             .esPrivado(true);

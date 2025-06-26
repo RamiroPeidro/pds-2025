@@ -1,9 +1,8 @@
 package com.pds.sportsmanager.patterns.strategy;
 
 import com.pds.sportsmanager.model.dto.PartidoBusquedaResult;
-import com.pds.sportsmanager.model.entity.Usuario;
+import com.pds.sportsmanager.model.entity.Jugador;
 import lombok.Builder;
-import lombok.Value;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -152,19 +151,19 @@ public class EmparejamientoPorCercania implements EstrategiaEmparejamiento {
             double puntuacionTotal
     ) {
 
-        public static ResultadoCompatibilidad calcular(Usuario usuario, PartidoBusquedaResult partido, CriteriosPuntuacion criterios) {
+        public static ResultadoCompatibilidad calcular(Jugador jugador, PartidoBusquedaResult partido, CriteriosPuntuacion criterios) {
             var builder = ResultadoCompatibilidad.builder();
 
-            double puntuacionDistancia = calcularPuntuacionDistancia(usuario, partido, criterios);
+            double puntuacionDistancia = calcularPuntuacionDistancia(jugador, partido, criterios);
             builder.puntuacionDistancia(puntuacionDistancia);
 
-            double puntuacionNivel = calcularPuntuacionNivel(usuario, partido, criterios);
+            double puntuacionNivel = calcularPuntuacionNivel(jugador, partido, criterios);
             builder.puntuacionNivel(puntuacionNivel);
 
             double puntuacionJugadores = criterios.jugadores().calcularPuntuacion(partido.jugadoresFaltantes());
             builder.puntuacionJugadores(puntuacionJugadores);
 
-            double puntuacionDeporte = esDeporteFavorito(usuario, partido) ? criterios.deporteFavorito() : 0.0;
+            double puntuacionDeporte = esDeporteFavorito(jugador, partido) ? criterios.deporteFavorito() : 0.0;
             builder.puntuacionDeporte(puntuacionDeporte);
 
             double total = puntuacionDistancia + puntuacionNivel + puntuacionJugadores + puntuacionDeporte;
@@ -173,30 +172,30 @@ public class EmparejamientoPorCercania implements EstrategiaEmparejamiento {
             return builder.build();
         }
 
-        private static double calcularPuntuacionDistancia(Usuario usuario, PartidoBusquedaResult partido, CriteriosPuntuacion criterios) {
-            if (usuario.getUbicacion() == null || partido.distanciaKm() == null) {
+        private static double calcularPuntuacionDistancia(Jugador jugador, PartidoBusquedaResult partido, CriteriosPuntuacion criterios) {
+            if (jugador.getUbicacion() == null || partido.distanciaKm() == null) {
                 return criterios.sinUbicacion();
             }
             return criterios.distancia().calcularPuntuacion(partido.distanciaKm());
         }
 
-        private static double calcularPuntuacionNivel(Usuario usuario, PartidoBusquedaResult partido, CriteriosPuntuacion criterios) {
-            if (usuario.getNivelDeJugador() == null) return 0.0;
+        private static double calcularPuntuacionNivel(Jugador jugador, PartidoBusquedaResult partido, CriteriosPuntuacion criterios) {
+            if (jugador.getNivelDeJuego() == null) return 0.0;
 
-            return switch (evaluarCompatibilidadNivel(usuario, partido)) {
+            return switch (evaluarCompatibilidadNivel(jugador, partido)) {
                 case COMPATIBLE -> criterios.nivel().compatible();
                 case ABIERTO -> criterios.nivel().abierto();
                 case INCOMPATIBLE -> 0.0;
             };
         }
 
-        private static CompatibilidadNivel evaluarCompatibilidadNivel(Usuario usuario, PartidoBusquedaResult partido) {
+        private static CompatibilidadNivel evaluarCompatibilidadNivel(Jugador jugador, PartidoBusquedaResult partido) {
             if (partido.nivelMinimo() == null && partido.nivelMaximo() == null) {
                 return CompatibilidadNivel.ABIERTO;
             }
 
             if (partido.nivelMinimo() != null && partido.nivelMaximo() != null) {
-                int nivelUser = usuario.getNivelDeJugador().ordinal();
+                int nivelUser = jugador.getNivelDeJuego().ordinal();
                 int nivelMin = partido.nivelMinimo().ordinal();
                 int nivelMax = partido.nivelMaximo().ordinal();
                 
@@ -208,9 +207,9 @@ public class EmparejamientoPorCercania implements EstrategiaEmparejamiento {
             return CompatibilidadNivel.INCOMPATIBLE;
         }
 
-        private static boolean esDeporteFavorito(Usuario usuario, PartidoBusquedaResult partido) {
-            return usuario.getDeporteFavorito() != null && 
-                   usuario.getDeporteFavorito().getNombre().equals(partido.deporte());
+        private static boolean esDeporteFavorito(Jugador jugador, PartidoBusquedaResult partido) {
+            return jugador.getDeporteFavorito() != null &&
+                    jugador.getDeporteFavorito().equals(partido.deporte());
         }
 
         private enum CompatibilidadNivel {
@@ -231,20 +230,20 @@ public class EmparejamientoPorCercania implements EstrategiaEmparejamiento {
     }
 
     @Override
-    public List<PartidoBusquedaResult> buscarPartidos(Usuario usuario, List<PartidoBusquedaResult> partidosDisponibles) {
+    public List<PartidoBusquedaResult> buscarPartidos(Jugador jugador, List<PartidoBusquedaResult> partidosDisponibles) {
         return partidosDisponibles.stream()
                 .filter(partido -> partido.necesitaJugadores())
-                .filter(partido -> partido.esNivelCompatible(usuario.getNivelDeJugador()))
+                .filter(partido -> partido.esNivelCompatible(jugador.getNivelDeJuego()))
                 .sorted((p1, p2) -> Double.compare(
-                        calcularCompatibilidad(usuario, p2), 
-                        calcularCompatibilidad(usuario, p1)
+                        calcularCompatibilidad(jugador, p2),
+                        calcularCompatibilidad(jugador, p1)
                 ))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public double calcularCompatibilidad(Usuario usuario, PartidoBusquedaResult partido) {
-        return ResultadoCompatibilidad.calcular(usuario, partido, criterios)
+    public double calcularCompatibilidad(Jugador jugador, PartidoBusquedaResult partido) {
+        return ResultadoCompatibilidad.calcular(jugador, partido, criterios)
                 .puntuacionTotal();
     }
 
