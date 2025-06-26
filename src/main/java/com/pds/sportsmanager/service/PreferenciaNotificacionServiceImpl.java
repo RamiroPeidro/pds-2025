@@ -1,6 +1,8 @@
 
 package com.pds.sportsmanager.service;
 
+import com.pds.sportsmanager.model.dto.PreferenciaDTO;
+import com.pds.sportsmanager.model.entity.Jugador;
 import com.pds.sportsmanager.model.entity.PreferenciaNotificacion;
 import com.pds.sportsmanager.repository.PreferenciaNotificacionRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,7 @@ import java.util.Optional;
 public class PreferenciaNotificacionServiceImpl implements PreferenciaNotificacionService {
 
     private final PreferenciaNotificacionRepository repository;
+    private final JugadorService jugadorService;
 
     @Override
     public Optional<PreferenciaNotificacion> obtenerPorUsuarioId(Long usuarioId) {
@@ -25,8 +28,14 @@ public class PreferenciaNotificacionServiceImpl implements PreferenciaNotificaci
     }
 
     @Override
-    public void guardar(PreferenciaNotificacion preferenciaNotificacion) {
-        repository.save(preferenciaNotificacion);
+    public void guardar(PreferenciaDTO preferenciaNotificacion, Long usuarioId) {
+        PreferenciaNotificacion preferencia = new PreferenciaNotificacion();
+        Jugador jugador = jugadorService.obtenerJugadorPorId(usuarioId);
+        preferencia.setJugador(jugador);
+        preferencia.setPush(preferenciaNotificacion.firebaseNotificaciones());
+        preferencia.setEmail(preferenciaNotificacion.emailNotificaciones());
+
+        repository.save(preferencia);
     }
 
 
