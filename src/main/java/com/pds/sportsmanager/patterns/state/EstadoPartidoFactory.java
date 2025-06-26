@@ -2,7 +2,6 @@ package com.pds.sportsmanager.patterns.state;
 
 /**
  * Factory para crear estados usando singleton instances
- * Evita la creación repetida de objetos stateless con 'new'
  */
 public class EstadoPartidoFactory {
     

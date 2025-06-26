@@ -3,8 +3,7 @@ package com.pds.sportsmanager.controller;
 import com.pds.sportsmanager.model.dto.PartidoBusquedaResult;
 import com.pds.sportsmanager.model.entity.Partido;
 import com.pds.sportsmanager.model.enums.NivelDeJuego;
-import com.pds.sportsmanager.patterns.strategy.EstrategiaEmparejamiento;
-import com.pds.sportsmanager.service.EstrategiaEmparejamientoFactory;
+
 import com.pds.sportsmanager.service.PartidoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -30,9 +29,7 @@ import java.util.stream.Collectors;
 public class PartidoController {
 
     private final PartidoService partidoService;
-    private final EstrategiaEmparejamientoFactory estrategiaFactory;
 
-    // DTOs para evitar LazyInitializationException
     @Builder
     public static record PartidoInputDTO(
         String titulo,
@@ -60,8 +57,6 @@ public class PartidoController {
         String estadoNombre,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
-        
-        // Información básica de las relaciones (sin lazy loading)
         Long ubicacionId,
         String ubicacionDireccion,
         Long deporteId,
@@ -84,8 +79,7 @@ public class PartidoController {
             .estadoNombre(partido.getEstadoNombre())
             .createdAt(partido.getCreatedAt())
             .updatedAt(partido.getUpdatedAt())
-            
-            // Información básica de relaciones (solo IDs y nombres principales)
+
             .ubicacionId(partido.getUbicacion() != null ? partido.getUbicacion().getId() : null)
             .ubicacionDireccion(partido.getUbicacion() != null ? partido.getUbicacion().getDireccion() : null)
             .deporteId(partido.getDeporte() != null ? partido.getDeporte().getId() : null)
@@ -177,14 +171,12 @@ public class PartidoController {
     @Operation(summary = "Buscar partidos", description = "Busca partidos usando diferentes estrategias de emparejamiento")
     public ResponseEntity<List<PartidoBusquedaResult>> buscarPartidos(
             @Parameter(description = "ID del usuario") @RequestParam Long usuarioId,
-            @Parameter(description = "Estrategia: 'nivel' o 'cercania'") @RequestParam(defaultValue = "nivel") String estrategia) {
+            @Parameter(description = "Estrategia: 'nivel', 'cercania' o 'historial'") @RequestParam(defaultValue = "nivel") String estrategia) {
         
         log.info("REST: Buscando partidos para usuario {} con estrategia {}", usuarioId, estrategia);
         
         try {
-            EstrategiaEmparejamiento estrategiaObj = estrategiaFactory.obtenerEstrategia(estrategia);
-            
-            List<PartidoBusquedaResult> partidos = partidoService.buscarPartidos(usuarioId, estrategiaObj);
+            List<PartidoBusquedaResult> partidos = partidoService.buscarPartidos(usuarioId, estrategia);
             return ResponseEntity.ok(partidos);
         } catch (RuntimeException e) {
             log.error("Error al buscar partidos: {}", e.getMessage());
